@@ -1,0 +1,14 @@
+openapi: 3.0.3
+info:
+  title: Banking API
+  description: Banking API
+  version: 1.0.0
+tags:
+  - name: Users
+    description: Endpoints for users.
+  - name: Authentication
+    description: Endpoints for authentication.
+  - name: Accounts
+    description: Endpoints for bank accounts.
+  - name: Transactions
+    description: Endpoints for transactions.
