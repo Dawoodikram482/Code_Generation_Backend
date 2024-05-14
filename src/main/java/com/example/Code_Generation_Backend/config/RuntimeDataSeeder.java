@@ -6,10 +6,12 @@ import com.example.Code_Generation_Backend.services.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
-
+@Component
 public class RuntimeDataSeeder implements ApplicationRunner {
 
     private final UserService userService;

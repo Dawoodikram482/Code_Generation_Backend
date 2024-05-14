@@ -1,4 +1,4 @@
-package com.example.Code_Generation_Backend.requestDTOs;
+package com.example.Code_Generation_Backend.DTOs.requestDTOs;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

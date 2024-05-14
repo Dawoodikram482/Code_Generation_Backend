@@ -2,7 +2,7 @@ package com.example.Code_Generation_Backend.services;
 
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
-import com.example.Code_Generation_Backend.requestDTOs.RegisterDTO;
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.RegisterDTO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
