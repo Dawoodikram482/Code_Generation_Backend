@@ -24,6 +24,7 @@ public class UserService {
             .dateOfBirth(LocalDate.parse(registerationDTO.dateOfBirth()))
             .build();
     public User SaveUser(User user){
+
         return userRepository.save(user);
     }
 }
