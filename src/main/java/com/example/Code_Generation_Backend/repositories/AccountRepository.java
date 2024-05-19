@@ -6,8 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public interface AccountRepository extends JpaRepository<Account, String>, JpaSp
   List<Account> findByCustomer_IdEquals(long id);
   int countAccountByCustomer_IdEqualsAndAccountTypeEquals(long customerId, @NonNull AccountType accountType);
   Page<Account> findByAccountType(@NonNull AccountType accountType, @NonNull Pageable pageable);
+  @Query("SELECT a FROM Account a")
   Page<Account> findAll(@NonNull Pageable pageable);
   boolean existsAccountByCustomerEmailEqualsIgnoreCaseAndIbanEquals(@NonNull String iban, @NonNull String email);
 }

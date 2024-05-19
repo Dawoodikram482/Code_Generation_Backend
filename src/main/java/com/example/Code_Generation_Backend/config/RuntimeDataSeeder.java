@@ -34,6 +34,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
     User employeeCustomer = seedEmployeeCustomer();
     User customer = seedCustomer();
     seedBankAccount();
+    secondSeedBankAccount();
   }
 
   private void seedEmployee() {
@@ -113,30 +114,30 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .build();
     accountService.saveAccount(seedAccount);
   }
-//  private void SeedBankAccount() {
-//    User uniBank = User.builder()
-//        .bsn("123456789")
-//        .firstName("Aura")
-//        .lastName("Alfina")
-//        .dateOfBirth(LocalDate.of(2000, 1, 1))
-//        .phoneNumber("9987654123")
-//        .email("aura@alfina.com")
-//        .password("password")
-//        .isActive(true)
-//        .roles(List.of(Role.ROLE_EMPLOYEE))
-//        .transactionLimit(99999999)
-//        .dayLimit(99999999)
-//        .build();
-//    userService.SaveUser(uniBank);
-//    Account seedAccount = Account.builder()
-//        .iban("NL01UNIB123456789")
-//        .accountBalance(1000000)
-//        .creationDate(LocalDate.now())
-//        .absoluteLimit(0)
-//        .isActive(true)
-//        .accountType(AccountType.CURRENT)
-//        .customer(uniBank)
-//        .build();
-//    accountService.saveAccount(seedAccount);
-//  }
+  private void secondSeedBankAccount() {
+    User uniBank = User.builder()
+        .bsn("987654321")
+        .firstName("Aura")
+        .lastName("Alfina")
+        .dateOfBirth(LocalDate.of(2000, 1, 1))
+        .phoneNumber("9987654123")
+        .email("aura@alfina.com")
+        .password("password")
+        .isActive(true)
+        .roles(List.of(Role.ROLE_EMPLOYEE))
+        .transactionLimit(99999999)
+        .dayLimit(99999999)
+        .build();
+    userService.SaveUser(uniBank);
+    Account seedAccount = Account.builder()
+        .iban("NL01UNIB123456789")
+        .accountBalance(1000000)
+        .creationDate(LocalDate.now())
+        .absoluteLimit(0)
+        .isActive(true)
+        .accountType(AccountType.SAVINGS)
+        .customer(uniBank)
+        .build();
+    accountService.saveAccount(seedAccount);
+  }
 }

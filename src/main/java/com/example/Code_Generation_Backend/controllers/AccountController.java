@@ -6,7 +6,6 @@ import com.example.Code_Generation_Backend.models.AccountType;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +16,7 @@ import java.util.function.Function;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @Validated
 @RequestMapping("/accounts")
+@ControllerAdvice
 public class AccountController {
 
     private final String DEFAULT_OFFSET_STRING = "0";
@@ -30,7 +30,6 @@ public class AccountController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<Object> getAllAccounts(
             @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
             @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset,
