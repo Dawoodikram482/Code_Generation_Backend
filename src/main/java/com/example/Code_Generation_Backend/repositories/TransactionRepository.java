@@ -28,5 +28,5 @@ public interface TransactionRepository extends CrudRepository<Transaction, Long>
   @Query("UPDATE Account a SET a.accountBalance = a.accountBalance+ :amount WHERE a.iban = :accountTo")
   void increaseBalanceByAmount(double amount, String accountTo);
   @Query("SELECT sum (t.amount) FROM Transaction t WHERE t.accountFrom.customer.email = :userEmail AND t.date = current_date AND t.accountFrom.accountType = com.example.Code_Generation_Backend.models.AccountType.CURRENT AND t.accountTo.accountType = com.example.Code_Generation_Backend.models.AccountType.CURRENT")
-  Double getSumOfMoneyTransferredToday(@Param("iban") String iban);
+  Double getSumOfMoneyTransferredToday(@Param("userEmail") String userEmail);
 }
