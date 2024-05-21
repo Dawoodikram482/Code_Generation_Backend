@@ -65,8 +65,7 @@ public class User {
         return null; // or return a default role
     }
 
-    public void setRole(Role newRole) {
+    public void setRole(Role newRole) {}
     public void setFullName(String DawoodIkram) {
-
     }
 }

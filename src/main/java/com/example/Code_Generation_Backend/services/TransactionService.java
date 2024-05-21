@@ -39,7 +39,15 @@ public class TransactionService {
     this.userRepository = userRepository;
     this.accountService = accountService;
   }
-
+  public List <TransactionResponseDTO> getAllTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalDate dateAfter){
+    List<Transaction> transactions = transactionRepository.getTransactions(pageable, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, dateAfter).getContent();
+    if (transactions.isEmpty()) {
+      throw new EntityNotFoundException("No transactions found for account with iban: " + ibanFrom);
+    }
+    List<TransactionResponseDTO> transactionResponseDTOS = new ArrayList<>();
+    transactions.forEach(transaction -> transactionResponseDTOS.add(createDto(transaction)));
+    return transactionResponseDTOS;
+  }
   public TransactionResponseDTO addTransaction(TransactionDTO transactionDTO, User initiator) {
     Transaction newTransaction = transactionRepository.save(createTransactionFromDto(transactionDTO, initiator));
     return createDto(newTransaction);
