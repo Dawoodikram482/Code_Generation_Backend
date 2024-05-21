@@ -34,8 +34,12 @@ public class RuntimeDataSeeder implements ApplicationRunner {
     seedEmployee();
     User employeeCustomer = seedEmployeeCustomer();
     User customer = seedCustomer();
+    User newUser = seedNewUser();
     seedBankAccount();
+    secondSeedBankAccount();
+
     seedTransaction();
+
   }
 
   private void seedEmployee() {
@@ -88,6 +92,25 @@ public class RuntimeDataSeeder implements ApplicationRunner {
     userService.SaveUser(seedEmployeeCustomer);
     return seedEmployeeCustomer;
   }
+
+  private User seedNewUser() {
+    User seedNewUser = User.builder()
+            .bsn("277545895")
+            .firstName("Ugurr")
+            .lastName("Say")
+            .dateOfBirth(LocalDate.of(2005, 1, 1))
+            .phoneNumber("0611111111")
+            .email("ugur7@gmail.com")
+            .password("password")
+            .isActive(true)
+            .roles(List.of(Role.ROLE_NEWUSER))
+            .dayLimit(1000)
+            .transactionLimit(300)
+            .build();
+    userService.SaveUser(seedNewUser);
+    return seedNewUser;
+  }
+
   private void seedBankAccount() {
     User inhollandBank = User.builder()
         .bsn("227015277")
@@ -100,7 +123,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .isActive(true)
         .transactionLimit(999)
         .dayLimit(999)
-        .roles(List.of(Role.ROLE_EMPLOYEE))
+        .roles(List.of(Role.ROLE_CUSTOMER))
         .build();
 
     userService.SaveUser(inhollandBank);
@@ -115,6 +138,33 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .build();
     accountService.saveAccount(seedAccount);
   }
+
+  private void secondSeedBankAccount() {
+    User uniBank = User.builder()
+        .bsn("987654321")
+        .firstName("Aura")
+        .lastName("Alfina")
+        .dateOfBirth(LocalDate.of(2000, 1, 1))
+        .phoneNumber("9987654123")
+        .email("aura@alfina.com")
+        .password("password")
+        .isActive(true)
+        .roles(List.of(Role.ROLE_EMPLOYEE))
+        .transactionLimit(99999999)
+        .dayLimit(99999999)
+        .build();
+    userService.SaveUser(uniBank);
+    Account seedAccount = Account.builder()
+        .iban("NL01UNIB123456789")
+        .accountBalance(1000000)
+        .creationDate(LocalDate.now())
+        .absoluteLimit(0)
+        .isActive(true)
+        .accountType(AccountType.SAVINGS)
+        .customer(uniBank)
+        .build();
+    accountService.saveAccount(seedAccount);
+
   private void seedTransaction() {
     User Solaiman = User.builder()
         .bsn("582022290")
@@ -152,5 +202,6 @@ public class RuntimeDataSeeder implements ApplicationRunner {
     TransactionDTO newTransaction = new TransactionDTO(10.00, savings.getIban(),
         current.getIban());
     transactionService.addTransaction(newTransaction, Solaiman);
+
   }
 }
