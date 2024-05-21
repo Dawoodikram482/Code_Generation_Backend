@@ -3,6 +3,7 @@ package com.example.Code_Generation_Backend.services;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.RegisterDTO;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,5 +26,8 @@ public class UserService {
             .build();
     public User SaveUser(User user){
         return userRepository.save(user);
+    }
+    public User getUserByEmail(String email){
+        return userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("User with email: "+email+" not found"));
     }
 }
