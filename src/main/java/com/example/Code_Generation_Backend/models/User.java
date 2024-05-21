@@ -66,5 +66,7 @@ public class User {
     }
 
     public void setRole(Role newRole) {
+    public void setFullName(String DawoodIkram) {
+
     }
 }

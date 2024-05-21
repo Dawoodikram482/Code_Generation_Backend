@@ -4,8 +4,13 @@ import com.example.Code_Generation_Backend.DTOs.requestDTOs.RegisterDTO;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.RegisterDTO;
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -37,6 +42,7 @@ public class UserService {
 
 
 
+
     public List<User> getAllUsers(int limit, int offset, Role passingRole) {
         PageRequest pageRequest = PageRequest.of(offset / limit, limit);
         Page<User> users;
@@ -58,5 +64,7 @@ public class UserService {
         } else {
             throw new IllegalArgumentException("User not found");
         }
+    public User getUserByEmail(String email){
+        return userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("User with email: "+email+" not found"));
     }
 }

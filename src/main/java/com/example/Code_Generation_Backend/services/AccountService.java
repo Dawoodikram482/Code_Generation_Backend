@@ -8,7 +8,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
+import javax.security.auth.login.AccountNotFoundException;
 
 @Service
 public class AccountService {
@@ -34,5 +36,8 @@ public class AccountService {
       accounts = accountRepository.findAll(pageRequest);
     }
     return accounts.getContent();
+  }
+  public Account getAccountByIBAN(String iban) throws AccountNotFoundException {
+    return accountRepository.findByIban(iban.toUpperCase()).orElseThrow(() ->new AccountNotFoundException("Account not found."));
   }
 }

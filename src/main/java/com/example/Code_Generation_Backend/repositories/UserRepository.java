@@ -23,3 +23,4 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
 
     Page<User> findByRoles(Role passingRole, PageRequest pageRequest);
 }
+
