@@ -12,11 +12,11 @@ import java.util.List;
 
 @Service
 public class AccountService {
-  private final UserService userService;
-  private final AccountRepository accountRepository;
-  public AccountService(UserService userService, AccountRepository accountRepository) {
-    this.userService = userService;
-    this.accountRepository = accountRepository;
+
+    private final AccountRepository accountRepository;
+
+  public AccountService(AccountRepository accountRepository) {
+      this.accountRepository = accountRepository;
   }
   // this method is used for internal working with app No new account should be made from user side
   // because it doesn't check account creation limit
