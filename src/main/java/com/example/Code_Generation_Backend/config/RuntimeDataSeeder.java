@@ -1,10 +1,9 @@
 package com.example.Code_Generation_Backend.config;
 
-import com.example.Code_Generation_Backend.models.Account;
-import com.example.Code_Generation_Backend.models.AccountType;
-import com.example.Code_Generation_Backend.models.Role;
-import com.example.Code_Generation_Backend.models.User;
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.TransactionDTO;
+import com.example.Code_Generation_Backend.models.*;
 import com.example.Code_Generation_Backend.services.AccountService;
+import com.example.Code_Generation_Backend.services.TransactionService;
 import com.example.Code_Generation_Backend.services.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.ApplicationArguments;
@@ -21,10 +20,12 @@ public class RuntimeDataSeeder implements ApplicationRunner {
 
   private final UserService userService;
   private final AccountService accountService;
+  private final TransactionService transactionService;
 
-  public RuntimeDataSeeder(UserService userService, AccountService accountService) {
+  public RuntimeDataSeeder(UserService userService, AccountService accountService, TransactionService transactionService) {
     this.userService = userService;
     this.accountService = accountService;
+    this.transactionService = transactionService;
   }
 
   @Override
@@ -34,6 +35,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
     User employeeCustomer = seedEmployeeCustomer();
     User customer = seedCustomer();
     seedBankAccount();
+    seedTransaction();
   }
 
   private void seedEmployee() {
@@ -113,30 +115,42 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .build();
     accountService.saveAccount(seedAccount);
   }
-//  private void SeedBankAccount() {
-//    User uniBank = User.builder()
-//        .bsn("123456789")
-//        .firstName("Aura")
-//        .lastName("Alfina")
-//        .dateOfBirth(LocalDate.of(2000, 1, 1))
-//        .phoneNumber("9987654123")
-//        .email("aura@alfina.com")
-//        .password("password")
-//        .isActive(true)
-//        .roles(List.of(Role.ROLE_EMPLOYEE))
-//        .transactionLimit(99999999)
-//        .dayLimit(99999999)
-//        .build();
-//    userService.SaveUser(uniBank);
-//    Account seedAccount = Account.builder()
-//        .iban("NL01UNIB123456789")
-//        .accountBalance(1000000)
-//        .creationDate(LocalDate.now())
-//        .absoluteLimit(0)
-//        .isActive(true)
-//        .accountType(AccountType.CURRENT)
-//        .customer(uniBank)
-//        .build();
-//    accountService.saveAccount(seedAccount);
-//  }
+  private void seedTransaction() {
+    User Solaiman = User.builder()
+        .bsn("582022290")
+        .firstName("Solaiman")
+        .lastName("Hossain")
+        .dateOfBirth(LocalDate.of(2003, 10, 1))
+        .phoneNumber("0611111121")
+        .email("Solaiman@hossain.com")
+        .password("secretword")
+        .isActive(true)
+        .dayLimit(300)
+        .transactionLimit(300)
+        .roles(List.of(Role.ROLE_EMPLOYEE))
+        .build();
+    userService.SaveUser(Solaiman);
+
+    Account savings = Account.builder()
+        .iban("NL01INHO0000000003")
+        .accountBalance(9999.0)
+        .isActive(true)
+        .accountType(AccountType.SAVINGS)
+        .customer(Solaiman)
+        .build();
+
+    Account current = Account.builder()
+        .iban("NL01INHO0000000002")
+        .accountBalance(2900.0)
+        .isActive(true)
+        .accountType(AccountType.CURRENT)
+        .customer(Solaiman)
+        .build();
+    accountService.saveAccount(savings);
+    accountService.saveAccount(current);
+
+    TransactionDTO newTransaction = new TransactionDTO(10.00, savings.getIban(),
+        current.getIban());
+    transactionService.addTransaction(newTransaction, Solaiman);
+  }
 }

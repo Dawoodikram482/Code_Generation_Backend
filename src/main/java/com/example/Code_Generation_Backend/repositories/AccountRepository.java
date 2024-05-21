@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, String>, JpaSpecificationExecutor<Account> {
@@ -17,4 +18,5 @@ public interface AccountRepository extends JpaRepository<Account, String>, JpaSp
   List<Account> findByCustomer_IdEquals(long id);
   int countAccountByCustomer_IdEqualsAndAccountTypeEquals(long customerId, AccountType accountType);
   boolean existsAccountByCustomerEmailEqualsIgnoreCaseAndIbanEquals(String iban, String email);
+  Optional<Account> findByIban(String iban);
 }

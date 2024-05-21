@@ -59,4 +59,7 @@ public class User {
         }
         roles.add(role);
     }
+
+    public void setFullName(String DawoodIkram) {
+    }
 }
