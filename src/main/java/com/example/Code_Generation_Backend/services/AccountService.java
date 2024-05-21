@@ -4,6 +4,8 @@ import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 @Service
 public class AccountService {
   private final UserService userService;
@@ -17,5 +19,7 @@ public class AccountService {
   public void saveAccount(Account account) {
     accountRepository.save(account);
   }
-
+  public Account getAccountByIBAN(String iban) throws AccountNotFoundException {
+    return accountRepository.findByIban(iban.toUpperCase()).orElseThrow(() ->new AccountNotFoundException("Account not found."));
+  }
 }
