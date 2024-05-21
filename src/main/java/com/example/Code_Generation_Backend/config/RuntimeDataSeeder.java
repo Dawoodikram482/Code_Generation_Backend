@@ -164,7 +164,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .customer(uniBank)
         .build();
     accountService.saveAccount(seedAccount);
-
+  }
   private void seedTransaction() {
     User Solaiman = User.builder()
         .bsn("582022290")

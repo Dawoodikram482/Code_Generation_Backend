@@ -50,5 +50,5 @@ public class AccountController {
         );
     }
 
-    private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account -> new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer());
+    private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account -> new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer().getFullName());
 }
