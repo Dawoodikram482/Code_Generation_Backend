@@ -1,5 +1,6 @@
 package com.example.Code_Generation_Backend.controllers;
 
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.ATMTransactionDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.TransactionDTO;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
@@ -67,6 +68,13 @@ public class TransactionController {
     transactionService.processTransaction(transactionDTO);
     return ResponseEntity.ok().body("Transaction added successfully");
   }
+
+  @PostMapping("/atm")
+  public ResponseEntity<Object> deposit(@RequestBody ATMTransactionDTO atmTransactionDTO) {
+    transactionService.processATMTransaction(atmTransactionDTO);
+    return ResponseEntity.ok().body("Transaction added successfully");
+  }
+
   private Pageable getPagination(int limit, int offset) {
     return PageRequest.of(offset / limit, limit);
   }

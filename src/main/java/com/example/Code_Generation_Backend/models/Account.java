@@ -8,10 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
@@ -20,10 +18,14 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
+
+  @Getter
+  @Setter
   @Id
   @GeneratedValue(generator = "IBANGenerator", strategy = GenerationType.IDENTITY)
   @GenericGenerator(name = "IBANGenerator", strategy = "com.example.Code_Generation_Backend.generators.IBANGenerator")
   private String iban;
+
   private double accountBalance;
   @Builder.Default
   private LocalDate creationDate = LocalDate.now();
@@ -42,4 +44,6 @@ public class Account {
       throw new IllegalArgumentException("Balance can not be negative");
     }
   }
+
+
 }
