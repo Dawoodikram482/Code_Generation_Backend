@@ -1,5 +1,6 @@
 package com.example.Code_Generation_Backend.services;
 
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.ATMTransactionDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.TransactionDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionAccountDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionResponseDTO;
@@ -58,6 +59,22 @@ public class TransactionService {
     User user = createDummyUserForTransactions();
     Transaction newTransaction = transactionRepository.save(createTransactionFromDto(transactionDTO, user));
     return newTransaction;
+  }
+
+  public void processATMTransaction(ATMTransactionDTO atmTransactionDTO) {
+    Account account = accountRepository.findById(atmTransactionDTO.account()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + atmTransactionDTO.account() + " not found."));
+
+    if (atmTransactionDTO.action().equals("deposit")) {
+      increaseBalance(atmTransactionDTO.amount(), atmTransactionDTO.account());
+    } else if (atmTransactionDTO.action().equals("withdraw")) {
+      // check if the account has enough balance  to withdraw
+
+      if (account.getAccountBalance() < atmTransactionDTO.amount()) {
+        throw new InsufficientBalanceException("Insufficient balance");
+      }
+
+      decreaseBalance(atmTransactionDTO.amount(), atmTransactionDTO.account());
+    }
   }
 
   public List<TransactionResponseDTO> getTransactions(Pageable pageable, String iban) {
@@ -176,8 +193,8 @@ public class TransactionService {
         transaction.getAccountTo().getCustomer().getFullName());
     return new TransactionResponseDTO(transaction.getTransactionID(), transaction.getAmount(), accountFromDTO, accountToDTO, transaction.getDate(), transaction.getTimestamp(), transaction.getUserPerforming().getFullName());
   }
-  public double getSumOfMoneyTransferredToday(String iban){
-    Double amount = transactionRepository.getSumOfMoneyTransferredToday(iban);
+  public double getSumOfMoneyTransferredToday(String email){
+    Double amount = transactionRepository.getSumOfMoneyTransferredToday(email);
     return amount == null ? 0.00: amount;
   }
   public User createDummyUserForTransactions() {
