@@ -30,6 +30,8 @@ public class BeansFactory {
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .requestMatchers("/h2-console/**").permitAll()  // Allow access to H2 console
             .requestMatchers("/transactions/**").permitAll()
+            .requestMatchers("/users/{userId}/approve").hasRole("EMPLOYEE")
+            .requestMatchers("/test-employee-role").hasRole("EMPLOYEE")
             .anyRequest().authenticated()  // Require authentication for all other requests
         )
         .csrf(csrf -> csrf
