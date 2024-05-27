@@ -8,9 +8,11 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.Metamodel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Map;
 import java.util.Random;
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity
 public class BeansFactory {
   @Bean
   public Random random() {
@@ -30,12 +33,11 @@ public class BeansFactory {
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .requestMatchers("/h2-console/**").permitAll()  // Allow access to H2 console
             .requestMatchers("/transactions/**").permitAll()
-            .requestMatchers("/users/{userId}/approve").hasRole("EMPLOYEE")
-            .requestMatchers("/test-employee-role").hasRole("EMPLOYEE")
-            .anyRequest().authenticated()  // Require authentication for all other requests
+            .requestMatchers("/login").permitAll()
+            .anyRequest().authenticated()
         )
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/h2-console/**", "/transactions/**")  // Disable CSRF protection for H2 console
+            .ignoringRequestMatchers("/login", "/h2-console/**", "/transactions/**")
         )
         .headers(headers -> headers
             .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)  // Allow H2 console to be embedded in a frame
@@ -43,6 +45,12 @@ public class BeansFactory {
 
     return http.build();
   }
+
+  @Bean
+  public BCryptPasswordEncoder bCryptPasswordEncoder() {
+    return new BCryptPasswordEncoder(12);
+  }
+
   @Bean
   public EntityManager entityManager(){
     return new EntityManager() {
