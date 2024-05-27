@@ -9,6 +9,7 @@ import com.example.Code_Generation_Backend.services.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -21,10 +22,21 @@ public class RuntimeDataSeeder implements ApplicationRunner {
 
   private final UserService userService;
   private final AccountService accountService;
+<<<<<<< Updated upstream
 
   public RuntimeDataSeeder(UserService userService, AccountService accountService) {
     this.userService = userService;
     this.accountService = accountService;
+=======
+  private final TransactionService transactionService;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+  public RuntimeDataSeeder(UserService userService, AccountService accountService, TransactionService transactionService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    this.userService = userService;
+    this.accountService = accountService;
+    this.transactionService = transactionService;
+    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+>>>>>>> Stashed changes
   }
 
   @Override
@@ -77,7 +89,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .dateOfBirth(LocalDate.of(2005, 1, 1))
         .phoneNumber("0611111111")
         .email("ugur@gmail.com")
-        .password("password")
+        .password(bCryptPasswordEncoder.encode("password"))
         .isActive(true)
         .roles(List.of(Role.ROLE_EMPLOYEE, Role.ROLE_CUSTOMER))
         .dayLimit(1000)
