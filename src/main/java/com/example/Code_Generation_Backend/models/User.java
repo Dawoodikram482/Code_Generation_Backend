@@ -1,10 +1,7 @@
 package com.example.Code_Generation_Backend.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +23,7 @@ public class User {
     private String lastName;
     private LocalDate dateOfBirth;
     private String phoneNumber;
+    private Boolean isApproved;
     @Column(unique = true)
     private String email;
     @JsonIgnore
@@ -35,6 +33,7 @@ public class User {
     private double dayLimit = 500;
     @Builder.Default
     private double transactionLimit = 200;
+    @Getter
     @ElementCollection(fetch = FetchType.EAGER)
     private List<Role> roles;
 
@@ -58,5 +57,21 @@ public class User {
             return;
         }
         roles.add(role);
+    }
+
+    public Role getRole() {
+        if (roles != null && !roles.isEmpty()) {
+            return roles.getFirst();
+        }
+        return null; // or return a default role
+    }
+    public boolean isApproved() {
+        return isApproved;
+    }
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
+    public void setRole(Role newRole) {}
+    public void setFullName(String DawoodIkram) {
     }
 }

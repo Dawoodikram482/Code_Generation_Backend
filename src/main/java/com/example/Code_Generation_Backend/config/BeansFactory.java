@@ -8,31 +8,22 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.Metamodel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-<<<<<<< Updated upstream
-=======
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
->>>>>>> Stashed changes
 
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-<<<<<<< Updated upstream
-=======
 @EnableWebSecurity
->>>>>>> Stashed changes
 @Configuration
 public class BeansFactory {
   @Bean
   public Random random() {
     return new Random();
   }
-<<<<<<< Updated upstream
-=======
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -41,10 +32,12 @@ public class BeansFactory {
             .requestMatchers("/h2-console/**").permitAll()  // Allow access to H2 console
             .requestMatchers("/transactions/**").permitAll()
             .requestMatchers("/login").permitAll()
-            .anyRequest().authenticated()  // Require authentication for all other requests
         )
         .csrf(csrf -> csrf
             .ignoringRequestMatchers("/login", "/h2-console/**", "/transactions/**")  // Disable CSRF protection for H2 console
+            .requestMatchers("/users/{userId}/approve").hasRole("EMPLOYEE")
+            .requestMatchers("/test-employee-role").hasRole("EMPLOYEE")
+            .anyRequest().authenticated()  // Require authentication for all other requests
         )
         .headers(headers -> headers
             .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)  // Allow H2 console to be embedded in a frame
@@ -58,7 +51,6 @@ public class BeansFactory {
     return new BCryptPasswordEncoder(12);
   }
 
->>>>>>> Stashed changes
   @Bean
   public EntityManager entityManager(){
     return new EntityManager() {
