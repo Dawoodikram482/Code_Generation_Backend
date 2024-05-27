@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.Metamodel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Random;
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity
 public class BeansFactory {
   @Bean
   public Random random() {
@@ -32,12 +34,10 @@ public class BeansFactory {
             .requestMatchers("/h2-console/**").permitAll()  // Allow access to H2 console
             .requestMatchers("/transactions/**").permitAll()
             .requestMatchers("/login").permitAll()
+            .anyRequest().authenticated()
         )
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/login", "/h2-console/**", "/transactions/**")  // Disable CSRF protection for H2 console
-            .requestMatchers("/users/{userId}/approve").hasRole("EMPLOYEE")
-            .requestMatchers("/test-employee-role").hasRole("EMPLOYEE")
-            .anyRequest().authenticated()  // Require authentication for all other requests
+            .ignoringRequestMatchers("/login", "/h2-console/**", "/transactions/**")
         )
         .headers(headers -> headers
             .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)  // Allow H2 console to be embedded in a frame

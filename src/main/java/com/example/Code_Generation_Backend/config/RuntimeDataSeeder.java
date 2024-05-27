@@ -29,7 +29,6 @@ public class RuntimeDataSeeder implements ApplicationRunner {
     this.accountService = accountService;
     this.transactionService = transactionService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    this.transactionService = transactionService;
   }
 
   @Override
