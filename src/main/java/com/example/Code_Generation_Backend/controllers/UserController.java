@@ -1,10 +1,14 @@
 package com.example.Code_Generation_Backend.controllers;
 
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,16 +50,22 @@ public class UserController {
         );
     }
 
-    @PostMapping("/updateRole")
-    public ResponseEntity<Object> updateUserRole(@RequestBody @Validated UserDTO updateUserRoleDTO) {
+    @PostMapping("/{userId}/approve")
+    @PreAuthorize("hasAnyRole('EMPLOYEE')")
+    public ResponseEntity<Object> approveUser(@PathVariable Long userId, @RequestBody AccountCreatingDTO creatingDTO) {
         try {
-            Role newRole = Role.valueOf(updateUserRoleDTO.getNewRole().toUpperCase());
-            User updatedUser = userService.updateUserRole(updateUserRoleDTO.getUserId(), newRole);
-            return ResponseEntity.ok(mapUserObjectToDTO.apply(updatedUser));
+            userService.approveUser(userId, creatingDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(new Object[0]);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("The role is not valid");
         }
     }
+    @PostMapping("/test-employee-role")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<String> testEmployeeRole() {
+        return ResponseEntity.ok("Role EMPLOYEE is recognized");
+    }
 
-    private final Function<User, UserDTO> mapUserObjectToDTO = user -> new UserDTO(user.getBsn(), user.getFirstName(), user.getLastName(), user.getDateOfBirth(),user.getPhoneNumber(), user.getEmail(), user.getRole());
+
+    private final Function<User, UserDTO> mapUserObjectToDTO = user -> new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(), user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(), user.getDayLimit(),user.getTransactionLimit());
 }

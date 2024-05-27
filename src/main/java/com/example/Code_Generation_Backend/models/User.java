@@ -23,6 +23,7 @@ public class User {
     private String lastName;
     private LocalDate dateOfBirth;
     private String phoneNumber;
+    private Boolean isApproved;
     @Column(unique = true)
     private String email;
     @JsonIgnore
@@ -64,7 +65,12 @@ public class User {
         }
         return null; // or return a default role
     }
-
+    public boolean isApproved() {
+        return isApproved;
+    }
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
     public void setRole(Role newRole) {}
     public void setFullName(String DawoodIkram) {
     }
