@@ -13,6 +13,7 @@ public record UserDTO(
     String email,
     boolean isActive,
     double dayLimit,
+    boolean isApproved,
     double transactionLimit
     ) {
 

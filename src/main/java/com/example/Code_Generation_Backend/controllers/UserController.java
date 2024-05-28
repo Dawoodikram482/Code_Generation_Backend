@@ -6,7 +6,6 @@ import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -67,5 +66,9 @@ public class UserController {
     }
 
 
-    private final Function<User, UserDTO> mapUserObjectToDTO = user -> new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(), user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(), user.getDayLimit(),user.getTransactionLimit());
+    private final Function<User, UserDTO> mapUserObjectToDTO = user ->
+            new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
+                    user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
+                    user.getDayLimit(),user.isApproved(), user.getTransactionLimit()
+            );
 }

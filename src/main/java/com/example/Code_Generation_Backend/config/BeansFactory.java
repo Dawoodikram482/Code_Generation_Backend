@@ -33,7 +33,9 @@ public class BeansFactory {
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .requestMatchers("/h2-console/**").permitAll()  // Allow access to H2 console
             .requestMatchers("/transactions/**").permitAll()
-            .requestMatchers("/login").permitAll()
+                .requestMatchers("/accounts/**").permitAll()
+                .requestMatchers("/users/**").permitAll()
+                .requestMatchers("/login").permitAll()
             .anyRequest().authenticated()
         )
         .csrf(csrf -> csrf

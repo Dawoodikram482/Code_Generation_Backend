@@ -55,6 +55,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .email("db@gmail.com")
         .password("password")
         .isActive(true)
+            .isApproved(false)
         .roles(List.of(Role.ROLE_EMPLOYEE))
         .build();
     userService.SaveUser(seedEmployee);
@@ -73,6 +74,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .roles(List.of(Role.ROLE_CUSTOMER))
         .dayLimit(300)
         .transactionLimit(300)
+            .isApproved(false)
         .build();
     userService.SaveUser(seedCustomer);
     return seedCustomer;
@@ -91,6 +93,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .roles(List.of(Role.ROLE_EMPLOYEE, Role.ROLE_CUSTOMER))
         .dayLimit(1000)
         .transactionLimit(300)
+            .isApproved(false)
         .build();
     userService.SaveUser(seedEmployeeCustomer);
     return seedEmployeeCustomer;
@@ -127,6 +130,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .isActive(true)
         .transactionLimit(999)
         .dayLimit(999)
+            .isApproved(true)
         .roles(List.of(Role.ROLE_CUSTOMER))
         .build();
 
@@ -156,6 +160,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .roles(List.of(Role.ROLE_EMPLOYEE))
         .transactionLimit(99999999)
         .dayLimit(99999999)
+            .isApproved(true)
         .build();
     userService.SaveUser(uniBank);
     Account seedAccount = Account.builder()
@@ -182,6 +187,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .isActive(true)
         .dayLimit(300)
         .transactionLimit(300)
+            .isApproved(true)
         .roles(List.of(Role.ROLE_EMPLOYEE))
         .build();
     userService.SaveUser(Solaiman);
