@@ -63,11 +63,11 @@ public class TransactionService {
     accountService.saveAccount(account);
   }
 
-  public Transaction processTransaction(TransactionDTO transactionDTO) {
-    User user = createDummyUserForTransactions();
-    Transaction newTransaction = transactionRepository.save(createTransactionFromDto(transactionDTO, user));
-    return newTransaction;
-  }
+//  public Transaction processTransaction(TransactionDTO transactionDTO) {
+//    User user = createDummyUserForTransactions();
+//    Transaction newTransaction = transactionRepository.save(createTransactionFromDto(transactionDTO, user));
+//    return newTransaction;
+//  }
 
   public void processATMTransaction(ATMTransactionDTO atmTransactionDTO) {
     Account account = accountRepository.findById(atmTransactionDTO.account()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + atmTransactionDTO.account() + " not found."));
@@ -140,10 +140,10 @@ public class TransactionService {
   private void validateLimits(Account accountFrom, Account accountTo, double amount) {
     if (accountFrom.getAbsoluteLimit() < amount) {
       if (accountTo == null || (accountTo.getAccountType() != AccountType.SAVINGS && accountFrom.getAccountType() != AccountType.SAVINGS)) {
-        throw new TransactionLimitException("Transaction limit exceeded");
+        throw new TransactionLimitException("Absolute limit exceeded");
       }
     }
-    if(accountFrom.getCustomer().getDayLimit()<amount){
+    if(accountFrom.getCustomer().getTransactionLimit()<amount){
       throw new DailyLimitException("Cannot exceed daily transaction limit");
     }
     if (accountFrom.getAccountType() == AccountType.SAVINGS && accountFrom.getCustomer().getId() == accountTo.getCustomer().getId()) {
@@ -204,11 +204,5 @@ public class TransactionService {
   public double getSumOfMoneyTransferredToday(String email){
     Double amount = transactionRepository.getSumOfMoneyTransferredToday(email);
     return amount == null ? 0.00: amount;
-  }
-  public User createDummyUserForTransactions() {
-    User user = new User();
-    user.setFullName("DawoodIkram");
-    userRepository.save(user);
-    return user;
   }
 }

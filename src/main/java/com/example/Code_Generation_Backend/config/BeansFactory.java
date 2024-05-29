@@ -9,11 +9,8 @@ import jakarta.persistence.metamodel.Metamodel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.List;
 import java.util.Map;
@@ -26,26 +23,6 @@ public class BeansFactory {
   public Random random() {
     return new Random();
   }
-
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-            .requestMatchers("/h2-console/**").permitAll()  // Allow access to H2 console
-            .requestMatchers("/transactions/**").permitAll()
-            .requestMatchers("/login").permitAll()
-            .anyRequest().authenticated()
-        )
-        .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/login", "/h2-console/**", "/transactions/**")
-        )
-        .headers(headers -> headers
-            .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)  // Allow H2 console to be embedded in a frame
-        );
-
-    return http.build();
-  }
-
   @Bean
   public BCryptPasswordEncoder bCryptPasswordEncoder() {
     return new BCryptPasswordEncoder(12);
