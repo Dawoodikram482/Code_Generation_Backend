@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -64,9 +65,15 @@ public class TransactionController {
     return ResponseEntity.ok().body(transactions);
   }
   @PostMapping
-  public ResponseEntity<Object> addTransaction(@RequestBody @Valid TransactionDTO transactionDTO) {
-    transactionService.processTransaction(transactionDTO);
-    return ResponseEntity.ok().body("Transaction added successfully");
+  @PreAuthorize("hasAnyRole('CUSTOMER', 'EMPLOYEE')")
+  public ResponseEntity<Object> addTransaction(@RequestBody @Valid TransactionDTO transactionDTO, @AuthenticationPrincipal UserDetails jwtUser){
+    if(transactionService.isValidTransaction(transactionDTO)) {
+      User userPerforming= userService.getUserByEmail(jwtUser.getUsername());
+      transactionService.changeBalance(transactionDTO.amount(), transactionDTO.accountFrom(), transactionDTO.accountTo());
+      TransactionResponseDTO newTransaction = transactionService.addTransaction(transactionDTO, userPerforming);
+      return ResponseEntity.ok().body(newTransaction);
+    }
+    return null;
   }
 
   @PostMapping("/atm")
