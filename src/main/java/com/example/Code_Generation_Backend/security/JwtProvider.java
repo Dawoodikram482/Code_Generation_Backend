@@ -29,6 +29,10 @@ public class JwtProvider {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + 3600000);
         Key privateKey = keyProvider.getPrivateKey();
+        if (!roles.contains(Role.ROLE_EMPLOYEE)) {
+            roles.add(Role.ROLE_EMPLOYEE);
+        }
+
         return Jwts.builder()
                 .subject(email)
                 .claim("auth", roles.stream().map(Role::name).toList())
@@ -36,6 +40,7 @@ public class JwtProvider {
                 .expiration(expiration)
                 .signWith(privateKey)
                 .compact();
+
     }
 
     public Authentication getAuthentication(String token) {

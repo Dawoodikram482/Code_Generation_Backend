@@ -1,8 +1,10 @@
 package com.example.Code_Generation_Backend.controllers;
 
-import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionAccountDTO;
+import com.example.Code_Generation_Backend.DTOs.responseDTOs.AccountDTO;
+import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.models.AccountType;
+import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -50,5 +52,15 @@ public class AccountController {
         );
     }
 
-    private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account -> new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer().getFullName());
+    private final Function<User, UserDTO> mapUserObjectToDTO = user ->
+            new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
+                    user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
+                    user.getDayLimit(), user.isApproved(), user.getTransactionLimit()
+            );
+
+//    private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account ->
+//            new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer().getFullName());
+
+    private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
+            new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()));
 }

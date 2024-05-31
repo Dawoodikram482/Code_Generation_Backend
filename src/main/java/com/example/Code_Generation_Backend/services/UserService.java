@@ -1,23 +1,17 @@
 package com.example.Code_Generation_Backend.services;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
-import com.example.Code_Generation_Backend.DTOs.requestDTOs.ApproveUserDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.RegisterDTO;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
-
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-
-import com.example.Code_Generation_Backend.DTOs.requestDTOs.RegisterDTO;
-import jakarta.persistence.EntityNotFoundException;
-
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 @Service
@@ -68,7 +62,26 @@ public class UserService {
       user.setDayLimit(accountCreatingDTO.dayLimit());
       user.setTransactionLimit(accountCreatingDTO.transactionLimit());
       user.setRole(Role.ROLE_CUSTOMER);
-      accountService.createAccount(accountCreatingDTO);
+      // Create checking account
+      AccountCreatingDTO checkingAccountDTO = new AccountCreatingDTO(
+              accountCreatingDTO.dayLimit(),
+              accountCreatingDTO.absoluteLimit(),
+              accountCreatingDTO.transactionLimit(),
+              "CURRENT",
+              accountCreatingDTO.accountHolderId()
+      );
+      accountService.createAccount(checkingAccountDTO);
+
+      // Create savings account
+      AccountCreatingDTO savingsAccountDTO = new AccountCreatingDTO(
+              accountCreatingDTO.dayLimit(),
+              accountCreatingDTO.absoluteLimit(),
+              accountCreatingDTO.transactionLimit(),
+              "SAVINGS",
+              accountCreatingDTO.accountHolderId()
+      );
+      accountService.createAccount(savingsAccountDTO);
+
       userRepository.save(user);
       return true;
     }catch (Exception e){
@@ -76,7 +89,7 @@ public class UserService {
     }
   }
 
-  //    public User updateUserRole(Long userId, Role newRole) {
+  //   public User updateUserRole(Long userId, Role newRole) {
 //        Optional<User> userOptional = userRepository.findById(userId);
 //        if (userOptional.isPresent()) {
 //            User user = userOptional.get();
@@ -89,4 +102,13 @@ public class UserService {
   public User getUserByEmail(String email) {
     return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
   }
+
+  public List<User> getUsersByApprovalStatus(int limit, int offset, boolean isApproved) {
+    PageRequest pageRequest = PageRequest.of(offset / limit, limit);
+    Page<User> users;
+    // Fetch users by approval status from the database
+    users= userRepository.findByIsApproved(isApproved, pageRequest);
+    return users.getContent();
+  }
+
 }
