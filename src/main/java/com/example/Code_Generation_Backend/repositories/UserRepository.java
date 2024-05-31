@@ -11,23 +11,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public interface UserRepository extends CrudRepository<User, Long>, JpaSpecificationExecutor<User> {
-  Optional<User> findByEmail(String email);
-
-  //    Optional<User> findByBsn(String bsn);
+//    Optional<User> findByEmail(String email);
+//    Optional<User> findByBsn(String bsn);
 //    boolean existsByEmailEqualsIgnoreCase(String email);
 //    boolean existsByBsn(String bsn);
 //    Page<User> findByRole(@NonNull Role role, @NonNull Pageable pageable);
-  @Query("SELECT u FROM users u")
-  Page<User> findAll(@NonNull Pageable pageable);
+    @Query("SELECT u FROM users u")
+    Page<User> findAll(@NonNull Pageable pageable);
 
-  Page<User> findByRoles(Role passingRole, PageRequest pageRequest);
-  @Query("SELECT u FROM users u WHERE u.isApproved = ?1")
-  List<User> findApprovedUsers(boolean isApproved);
-
+    Page<User> findByRoles(Role passingRole, PageRequest pageRequest);
 }
 

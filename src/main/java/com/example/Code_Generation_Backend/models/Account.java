@@ -37,6 +37,7 @@ public class Account {
   @ManyToOne
   private User customer;
 
+  //btw why is this in account models?
   public void setAccountBalance(double accountBalance) {
     if (accountBalance > 0) {
       this.accountBalance = accountBalance;
@@ -44,6 +45,5 @@ public class Account {
       throw new IllegalArgumentException("Balance can not be negative");
     }
   }
-
 
 }
