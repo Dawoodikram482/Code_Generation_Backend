@@ -48,9 +48,23 @@ public class UserController {
                 // using Parallel Stream to improve performance
         );
     }
+    @GetMapping("/pending-approvals")
+    public ResponseEntity<Object> getPendingApprovals(
+            @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
+            @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset) {
 
-    @PostMapping("/{userId}/approve")
-    @PreAuthorize("hasAnyRole('EMPLOYEE')")
+        // Get users with isApproved set to false
+        List<User> pendingApprovals = userService.getUsersByApprovalStatus(limit, offset, false);
+        // Map users to DTOs
+        return ResponseEntity.ok(
+                pendingApprovals.parallelStream().map(mapUserObjectToDTO).toList()
+                // using Parallel Stream to improve performance
+        );
+    }
+
+
+    @PostMapping("/approve/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
     public ResponseEntity<Object> approveUser(@PathVariable Long userId, @RequestBody AccountCreatingDTO creatingDTO) {
         try {
             userService.approveUser(userId, creatingDTO);
@@ -60,7 +74,7 @@ public class UserController {
         }
     }
     @PostMapping("/test-employee-role")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize(value = "hasRole('EMPLOYEE')")
     public ResponseEntity<String> testEmployeeRole() {
         return ResponseEntity.ok("Role EMPLOYEE is recognized");
     }

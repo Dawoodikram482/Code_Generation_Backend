@@ -23,4 +23,6 @@ public interface AccountRepository extends JpaRepository<Account, String>, JpaSp
   @Query("SELECT a FROM Account a")
   Page<Account> findAll(@NonNull Pageable pageable);
   Optional<Account> findByIban(String iban);
+
+    boolean existsByIban(String iban);
 }
