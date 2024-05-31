@@ -8,6 +8,8 @@ import com.example.Code_Generation_Backend.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,18 +65,24 @@ public class UserController {
     }
 
 
-    @PostMapping("/approve/{userId}")
+    @PostMapping("/{userId}/approve")
     @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
     public ResponseEntity<Object> approveUser(@PathVariable Long userId, @RequestBody AccountCreatingDTO creatingDTO) {
         try {
             userService.approveUser(userId, creatingDTO);
             return ResponseEntity.status(HttpStatus.OK).body(new Object[0]);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("The role is not valid");
+        } catch (Exception e) {
+            if(e instanceof BadCredentialsException){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            }
+            if(e instanceof AuthenticationException){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
     @PostMapping("/test-employee-role")
-    @PreAuthorize(value = "hasRole('EMPLOYEE')")
+    @PreAuthorize(value = "hasRole('ROLE_EMPLOYEE')")
     public ResponseEntity<String> testEmployeeRole() {
         return ResponseEntity.ok("Role EMPLOYEE is recognized");
     }
