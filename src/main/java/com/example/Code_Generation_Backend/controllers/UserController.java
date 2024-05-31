@@ -65,7 +65,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/{userId}/approve")
+    @PostMapping("/approve/{userId}")
     @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
     public ResponseEntity<Object> approveUser(@PathVariable Long userId, @RequestBody AccountCreatingDTO creatingDTO) {
         try {
@@ -81,12 +81,14 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+
+
     @PostMapping("/test-employee-role")
-    @PreAuthorize(value = "hasRole('ROLE_EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
     public ResponseEntity<String> testEmployeeRole() {
         return ResponseEntity.ok("Role EMPLOYEE is recognized");
     }
-
 
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
             new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),

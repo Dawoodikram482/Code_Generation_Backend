@@ -55,7 +55,7 @@ public class WebSecurityConfig {
         .requestMatchers("/login").permitAll()
         .requestMatchers("/register").permitAll()
         .requestMatchers("/users/**").permitAll()
-        .requestMatchers("/accounts").permitAll()
+        .requestMatchers("/accounts/**").permitAll()
         .requestMatchers("/atm/**").permitAll()
         .requestMatchers("/transactions/**").permitAll()
         .anyRequest().authenticated());

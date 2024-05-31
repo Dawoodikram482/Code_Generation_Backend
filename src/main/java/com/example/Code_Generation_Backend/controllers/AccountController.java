@@ -7,7 +7,11 @@ import com.example.Code_Generation_Backend.models.AccountType;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.UserService;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +54,25 @@ public class AccountController {
                 accounts.parallelStream().map(mapAccountObjectToDTO).toList()
                 // using Parallel Stream to improve performance
         );
+    }
+
+    @PostMapping("/closeAccount/{iban}")
+    @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
+    public ResponseEntity<Object> closeAccount(@PathVariable String iban) {
+        try {
+            boolean isClosed = accountService.closeAccount(iban);
+            if (isClosed) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to close the account");
+            }
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + e.getMessage());
+        }
     }
 
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
