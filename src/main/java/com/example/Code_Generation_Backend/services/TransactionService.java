@@ -4,10 +4,7 @@ import com.example.Code_Generation_Backend.DTOs.requestDTOs.ATMTransactionDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.TransactionDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionAccountDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionResponseDTO;
-import com.example.Code_Generation_Backend.models.Account;
-import com.example.Code_Generation_Backend.models.AccountType;
-import com.example.Code_Generation_Backend.models.Transaction;
-import com.example.Code_Generation_Backend.models.User;
+import com.example.Code_Generation_Backend.models.*;
 import com.example.Code_Generation_Backend.models.exceptions.DailyLimitException;
 import com.example.Code_Generation_Backend.models.exceptions.InsufficientBalanceException;
 import com.example.Code_Generation_Backend.models.exceptions.TransactionLimitException;
@@ -49,7 +46,7 @@ public class TransactionService {
     return transactionResponseDTOS;
   }
   public TransactionResponseDTO addTransaction(TransactionDTO transactionDTO, User initiator) {
-    Transaction newTransaction = transactionRepository.save(createTransactionFromDto(transactionDTO, initiator));
+    Transaction newTransaction = transactionRepository.save(createTransactionFromDto(transactionDTO, initiator, TransactionType.TRANSFER));
     return createDto(newTransaction);
   }
 
@@ -181,7 +178,7 @@ public class TransactionService {
 //    }
 //  }
 
-  public Transaction createTransactionFromDto(TransactionDTO transactionDTO, User initiator) {
+  public Transaction createTransactionFromDto(TransactionDTO transactionDTO, User initiator, TransactionType transactionType) {
     Transaction transaction = new Transaction();
     transaction.setAmount(transactionDTO.amount());
     transaction.setAccountFrom(accountRepository.findById(transactionDTO.accountFrom()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + transactionDTO.accountFrom() + " not found.")));
@@ -189,6 +186,7 @@ public class TransactionService {
     transaction.setDate(LocalDate.now());
     transaction.setTimestamp(LocalTime.now());
     transaction.setUserPerforming(initiator);
+    transaction.setTransactionType(transactionType);
     return transaction;
   }
 
@@ -199,7 +197,7 @@ public class TransactionService {
     TransactionAccountDTO accountToDTO = new TransactionAccountDTO(transaction.getAccountTo().getIban(),
         transaction.getAccountTo().getAccountType(),
         transaction.getAccountTo().getCustomer().getFullName());
-    return new TransactionResponseDTO(transaction.getTransactionID(), transaction.getAmount(), accountFromDTO, accountToDTO, transaction.getDate(), transaction.getTimestamp(), transaction.getUserPerforming().getFullName());
+    return new TransactionResponseDTO(transaction.getTransactionID(), transaction.getAmount(), accountFromDTO, accountToDTO, transaction.getDate(), transaction.getTimestamp(), transaction.getUserPerforming().getFullName(), transaction.getTransactionType());
   }
   public double getSumOfMoneyTransferredToday(String email){
     Double amount = transactionRepository.getSumOfMoneyTransferredToday(email);
