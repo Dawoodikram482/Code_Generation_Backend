@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
   private final JwtProvider jwtTokenProvider;
+
   public JwtTokenFilter(JwtProvider jwtTokenProvider) {
     this.jwtTokenProvider = jwtTokenProvider;
   }
@@ -22,26 +24,29 @@ public class JwtTokenFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     String token = getToken(request);
-    if (token != null) {
+    if (token == null){
+      filterChain.doFilter(request,response);
+      return;
+    }
+
       try {
         Authentication authentication = jwtTokenProvider.getAuthentication(token);
-      }
-      catch (JwtException e) {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      } catch (JwtException e) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write("Invalid JWT token");
         response.getWriter().flush();
         return;
-      }
-      catch (Exception exception){
+      } catch (Exception exception) {
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         response.getWriter()
-            .write("Something went wrong while validating the JWT. Please try again later.");
+            .write(exception.getMessage());
         response.getWriter().flush();
         return;
       }
-    }
-    filterChain.doFilter(request, response);
-  }
+    filterChain.doFilter(request,response);
+}
   private String getToken(HttpServletRequest request) {
     String header = request.getHeader("Authorization");
     if (header == null || !header.startsWith("Bearer ")) {
