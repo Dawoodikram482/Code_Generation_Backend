@@ -6,7 +6,6 @@ import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -49,9 +48,23 @@ public class UserController {
                 // using Parallel Stream to improve performance
         );
     }
+    @GetMapping("/pending-approvals")
+    public ResponseEntity<Object> getPendingApprovals(
+            @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
+            @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset) {
 
-    @PostMapping("/{userId}/approve")
-    @PreAuthorize("hasAnyRole('EMPLOYEE')")
+        // Get users with isApproved set to false
+        List<User> pendingApprovals = userService.getUsersByApprovalStatus(limit, offset, false);
+        // Map users to DTOs
+        return ResponseEntity.ok(
+                pendingApprovals.parallelStream().map(mapUserObjectToDTO).toList()
+                // using Parallel Stream to improve performance
+        );
+    }
+
+
+    @PostMapping("/approve/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
     public ResponseEntity<Object> approveUser(@PathVariable Long userId, @RequestBody AccountCreatingDTO creatingDTO) {
         try {
             userService.approveUser(userId, creatingDTO);
@@ -61,11 +74,15 @@ public class UserController {
         }
     }
     @PostMapping("/test-employee-role")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize(value = "hasRole('EMPLOYEE')")
     public ResponseEntity<String> testEmployeeRole() {
         return ResponseEntity.ok("Role EMPLOYEE is recognized");
     }
 
 
-    private final Function<User, UserDTO> mapUserObjectToDTO = user -> new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(), user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(), user.getDayLimit(),user.getTransactionLimit());
+    private final Function<User, UserDTO> mapUserObjectToDTO = user ->
+            new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
+                    user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
+                    user.getDayLimit(),user.isApproved(), user.getTransactionLimit()
+            );
 }
