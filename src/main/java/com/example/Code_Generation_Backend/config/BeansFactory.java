@@ -40,11 +40,36 @@ public class BeansFactory {
             .anyRequest().authenticated()  // Require authentication for all other requests
         )
         .headers(headers -> headers
-            .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)  // Allow H2 console to be embedded in a frame
+                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)  // Allow H2 console to be embedded in a frame
         );
 
     return http.build();
   }
+/*
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  http
+          .cors().and()  // Enable CORS
+          .csrf(csrf -> csrf
+                  .ignoringRequestMatchers("/login", "/h2-console/*", "/transactions/*")
+          )
+          .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                  .requestMatchers("/h2-console/**").permitAll()
+                  .requestMatchers("/login").permitAll()
+                  .requestMatchers("/transactions/**").permitAll()
+                  .anyRequest().authenticated()
+          )
+          .headers(headers -> headers
+                  .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+          )
+          .sessionManagement(sessionManagement -> sessionManagement
+                  .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          );
+
+  return http.build();
+}
+
+ */
 
   @Bean
   public BCryptPasswordEncoder bCryptPasswordEncoder() {
