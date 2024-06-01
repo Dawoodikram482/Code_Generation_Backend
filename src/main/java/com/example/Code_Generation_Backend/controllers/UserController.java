@@ -99,8 +99,6 @@ public class UserController {
         return ResponseEntity.ok(userDetailsDTO);
     }
 
-    private final Function<User, UserDTO> mapUserObjectToDTO = user -> new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(), user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(), user.getDayLimit(), user.getTransactionLimit());
-
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
             new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
                     user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),

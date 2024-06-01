@@ -99,9 +99,9 @@ public class UserService {
 //            throw new IllegalArgumentException("User not found");
 //        }
 //    }
-  public User getUserByEmail(String email) {
-    return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
-  }*/
+//  public User getUserByEmail(String email) {
+//    return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
+//  }
 
   // New method to get user details for the authenticated user
   //this will be called as soon as client login and their Account overview displayed
