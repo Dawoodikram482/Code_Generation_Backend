@@ -1,14 +1,11 @@
 package com.example.Code_Generation_Backend.models;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
-
 
 @Data
 @NoArgsConstructor
@@ -26,6 +23,7 @@ public class User {
     private String lastName;
     private LocalDate dateOfBirth;
     private String phoneNumber;
+    private Boolean isApproved;
     @Column(unique = true)
     private String email;
     @JsonIgnore
@@ -35,24 +33,34 @@ public class User {
     private double dayLimit = 500;
     @Builder.Default
     private double transactionLimit = 200;
+    @Getter
     @ElementCollection(fetch = FetchType.EAGER)
     private List<Role> roles;
 
+
+    @OneToMany(mappedBy = "customer")
+    private List<Account> accounts;
+
     public void setDayLimit(double dayLimit){
-        if(dayLimit>0){
-            this.dayLimit =dayLimit;
+        if(dayLimit > 0){
+            this.dayLimit = dayLimit;
         }else{
             this.dayLimit = 0;
         }
     }
+
     public void setTransactionLimit(double transactionLimit){
-        if(transactionLimit>0){
+        if(transactionLimit > 0){
             this.transactionLimit = transactionLimit;
         }else{
             this.transactionLimit = 0;
         }
     }
-    public String getFullName(){return firstName+""+lastName;}
+
+    public String getFullName(){
+        return firstName + " " + lastName;
+    }
+
     public void addRole(Role role){
         if(roles.contains(role)){
             return;
@@ -60,6 +68,21 @@ public class User {
         roles.add(role);
     }
 
-    public void setFullName(String DawoodIkram) {
+    public Role getRole() {
+        if (roles != null && !roles.isEmpty()) {
+            return roles.get(0);
+        }
+        return null; // or return a default role
     }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
+
+    public void setRole(Role newRole) {}
+    public void setFullName(String fullName) {}
 }

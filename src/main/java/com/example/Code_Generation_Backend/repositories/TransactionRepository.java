@@ -1,6 +1,7 @@
 package com.example.Code_Generation_Backend.repositories;
 
 import com.example.Code_Generation_Backend.models.Transaction;
+import com.example.Code_Generation_Backend.models.TransactionType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface TransactionRepository extends CrudRepository<Transaction, Long>,
@@ -29,4 +31,8 @@ public interface TransactionRepository extends CrudRepository<Transaction, Long>
   void increaseBalanceByAmount(double amount, String accountTo);
   @Query("SELECT sum (t.amount) FROM Transaction t WHERE t.accountFrom.customer.email = :userEmail AND t.date = current_date AND t.accountFrom.accountType = com.example.Code_Generation_Backend.models.AccountType.CURRENT AND t.accountTo.accountType = com.example.Code_Generation_Backend.models.AccountType.CURRENT")
   Double getSumOfMoneyTransferredToday(@Param("userEmail") String userEmail);
+  @Query("SELECT t FROM Transaction t")
+  Page<Transaction>getTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalDate dateAfter, TransactionType type);
+  @Query("SELECT t FROM Transaction t WHERE t.transactionType = :type")
+  List<Transaction> getTransactionsByType(TransactionType type);
 }
