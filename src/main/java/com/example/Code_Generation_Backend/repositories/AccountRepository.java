@@ -22,7 +22,11 @@ public interface AccountRepository extends JpaRepository<Account, String>, JpaSp
   Page<Account> findByAccountType(@NonNull AccountType accountType, @NonNull Pageable pageable);
   @Query("SELECT a FROM Account a")
   Page<Account> findAll(@NonNull Pageable pageable);
+  boolean existsAccountByCustomerEmailEqualsIgnoreCaseAndIbanEquals(@NonNull String iban, @NonNull String email);
+  int countAccountByCustomer_IdEqualsAndAccountTypeEquals(long customerId, AccountType accountType);
+  boolean existsAccountByCustomerEmailEqualsIgnoreCaseAndIbanEquals(String iban, String email);
   Optional<Account> findByIban(String iban);
 
-    boolean existsByIban(String iban);
+  Optional<Account> findByCustomerFirstNameAndCustomerLastName(String firstName, String lastName);
+  boolean existsByIban(String iban);
 }

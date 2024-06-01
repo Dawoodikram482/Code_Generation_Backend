@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
 import java.util.function.Function;
 
@@ -50,6 +51,29 @@ public class AccountController {
                 accounts.parallelStream().map(mapAccountObjectToDTO).toList()
                 // using Parallel Stream to improve performance
         );
+    };
+
+    /*@GetMapping("/search-iban")
+    public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
+        try {
+            Account account = accountService.getIbanByName(firstName, lastName);
+            return account.getIban();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "User does not exist"); // this will be caught by RestControllerExceptionHandler
+        } catch (AccountNotFoundException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }*/
+
+    @GetMapping("/search-iban")
+    public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
+        try {
+            return accountService.getIbanByName(firstName, lastName);
+        } catch (AccountNotFoundException e) {
+            return e.getMessage();
+        }
     }
 
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
@@ -64,3 +88,11 @@ public class AccountController {
     private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
             new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()));
 }
+
+
+
+
+
+
+    /*private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account -> new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer());
+}*/
