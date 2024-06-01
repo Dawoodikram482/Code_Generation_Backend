@@ -14,7 +14,9 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
     private AuthRepository authRepository;
-
+    public MyUserDetailsService(AuthRepository authRepository) {
+        this.authRepository = authRepository;
+    }
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = authRepository.findByEmail(email).orElse(null);

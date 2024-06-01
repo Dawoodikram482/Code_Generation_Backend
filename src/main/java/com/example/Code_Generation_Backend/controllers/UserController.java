@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,20 +53,40 @@ public class UserController {
                 // using Parallel Stream to improve performance
         );
     }
+    @GetMapping("/pending-approvals")
+    public ResponseEntity<Object> getPendingApprovals(
+            @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
+            @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset) {
+
+        // Get users with isApproved set to false
+        List<User> pendingApprovals = userService.getUsersByApprovalStatus(limit, offset, false);
+        // Map users to DTOs
+        return ResponseEntity.ok(
+                pendingApprovals.parallelStream().map(mapUserObjectToDTO).toList()
+                // using Parallel Stream to improve performance
+        );
+    }
+
 
     @PostMapping("/{userId}/approve")
-    @PreAuthorize("hasAnyRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
     public ResponseEntity<Object> approveUser(@PathVariable Long userId, @RequestBody AccountCreatingDTO creatingDTO) {
         try {
             userService.approveUser(userId, creatingDTO);
             return ResponseEntity.status(HttpStatus.OK).body(new Object[0]);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("The role is not valid");
+        } catch (Exception e) {
+            if(e instanceof BadCredentialsException){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            }
+            if(e instanceof AuthenticationException){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
     @PostMapping("/test-employee-role")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize(value = "hasRole('ROLE_EMPLOYEE')")
     public ResponseEntity<String> testEmployeeRole() {
         return ResponseEntity.ok("Role EMPLOYEE is recognized");
     }
@@ -78,5 +100,11 @@ public class UserController {
     }
 
     private final Function<User, UserDTO> mapUserObjectToDTO = user -> new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(), user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(), user.getDayLimit(), user.getTransactionLimit());
+
+    private final Function<User, UserDTO> mapUserObjectToDTO = user ->
+            new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
+                    user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
+                    user.getDayLimit(),user.isApproved(), user.getTransactionLimit()
+            );
 }
 
