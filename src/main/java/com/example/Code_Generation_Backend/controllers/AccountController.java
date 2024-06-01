@@ -88,11 +88,3 @@ public class AccountController {
     private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
             new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()));
 }
-
-
-
-
-
-
-    /*private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account -> new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer());
-}*/

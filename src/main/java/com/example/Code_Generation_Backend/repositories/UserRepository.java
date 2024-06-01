@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, Long>, JpaSpecificationExecutor<User> {
-//    Optional<User> findByEmail(String email);
+Optional<User> findByEmail(String email);
 //    Optional<User> findByBsn(String bsn);
 //    boolean existsByEmailEqualsIgnoreCase(String email);
 //    boolean existsByBsn(String bsn);
@@ -22,13 +22,9 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
     @Query("SELECT u FROM users u")
     Page<User> findAll(@NonNull Pageable pageable);
 
-  @Query("SELECT u FROM users u")
-  Page<User> findAll(@NonNull Pageable pageable);
-
   Page<User> findByRoles(Role passingRole, Pageable pageRequest);
 
   Page<User> findByIsApproved(boolean isApproved, Pageable pageRequest);
 
-    Page<User> findByRoles(Role passingRole, PageRequest pageRequest);
 }
 

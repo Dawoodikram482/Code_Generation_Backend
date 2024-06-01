@@ -89,20 +89,6 @@ public class UserService {
     }
   }
 
-  //   public User updateUserRole(Long userId, Role newRole) {
-//        Optional<User> userOptional = userRepository.findById(userId);
-//        if (userOptional.isPresent()) {
-//            User user = userOptional.get();
-//            user.setRole(newRole);
-//            return userRepository.save(user);
-//        } else {
-//            throw new IllegalArgumentException("User not found");
-//        }
-//    }
-  public User getUserByEmail(String email) {
-    return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
-  }*/
-
   // New method to get user details for the authenticated user
   //this will be called as soon as client login and their Account overview displayed
   public UserDetailsDTO getUserDetails(User user) {
@@ -125,5 +111,7 @@ public class UserService {
     users= userRepository.findByIsApproved(isApproved, pageRequest);
     return users.getContent();
   }
-
+  public User getUserByEmail(String email) {
+    return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
+  }
 }
