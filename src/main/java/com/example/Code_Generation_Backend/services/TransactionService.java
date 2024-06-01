@@ -79,7 +79,7 @@ public class TransactionService {
 //    }
   }
 
-  public Transaction Deposit(ATMTransactionDTO atmTransaction, String userPerforming) throws AccountNotFoundException {
+/*  public Transaction Deposit(ATMTransactionDTO atmTransaction, String userPerforming) throws AccountNotFoundException {
     Account receiver = accountService.getAccountByIBAN(atmTransaction.IBAN());
     if (receiver == null) {
       throw new AccountNotFoundException("Account with IBAN: " + atmTransaction.IBAN() + " not found");
@@ -97,7 +97,7 @@ public class TransactionService {
     );
     updateAccountBalance(receiver, atmTransaction.amount(), true);
     return transactionRepository.save(transaction);
-  }
+  }*/
 
   boolean isUserAuthorizedToAccessAccount(User user, Account account) {
     return user == account.getCustomer();

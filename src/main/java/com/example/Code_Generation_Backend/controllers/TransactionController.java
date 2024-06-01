@@ -72,7 +72,7 @@ public class TransactionController {
     return ResponseEntity.ok().body(transactions);
   }
 
-  @PostMapping
+  /*@PostMapping
   @PreAuthorize("hasAnyRole('CUSTOMER', 'EMPLOYEE')")
   public ResponseEntity<Object> addTransaction(@RequestBody @Valid TransactionDTO transactionDTO, @AuthenticationPrincipal UserDetails jwtUser) {
     try {
@@ -92,9 +92,9 @@ public class TransactionController {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
     return null;
-  }
+  }*/
 
-  @PostMapping("/atm/deposit")
+ /* @PostMapping("/atm/deposit")
   @PreAuthorize("hasAnyRole('ROLE_CUSTOMER', 'ROLE_EMPLOYEE')")
   public ResponseEntity<Object> deposit(@RequestBody ATMTransactionDTO atmTransactionDTO, @AuthenticationPrincipal UserDetails jwtUser) {
     try{
@@ -108,7 +108,7 @@ public class TransactionController {
       }
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
-  }
+  }*/
 
   @GetMapping("/atm/withdraw")
   public ResponseEntity<Object> getWithdrawals() {

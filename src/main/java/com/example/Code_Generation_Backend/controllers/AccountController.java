@@ -8,6 +8,7 @@ import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,6 +69,7 @@ public class AccountController {
     }*/
 
     @GetMapping("/search-iban")
+    @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
     public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
         try {
             return accountService.getIbanByName(firstName, lastName);

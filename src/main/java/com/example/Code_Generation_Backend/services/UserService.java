@@ -3,6 +3,7 @@ package com.example.Code_Generation_Backend.services;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.RegisterDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
+import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO.AccountDTO;
 import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
@@ -10,11 +11,12 @@ import com.example.Code_Generation_Backend.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -52,7 +54,7 @@ public class UserService {
     return users.getContent();
   }
 
-  public User getUserById(Long Id){
+  public User getUserById(Long Id) {
     return userRepository.findById(Id).orElseThrow(() -> new EntityNotFoundException("User with id: " + Id + " not found"));
   }
 
@@ -63,58 +65,27 @@ public class UserService {
       user.setDayLimit(accountCreatingDTO.dayLimit());
       user.setTransactionLimit(accountCreatingDTO.transactionLimit());
       user.setRole(Role.ROLE_CUSTOMER);
-//      // Create checking account
-//      AccountCreatingDTO checkingAccountDTO = new AccountCreatingDTO(
-//              accountCreatingDTO.dayLimit(),
-//              accountCreatingDTO.absoluteLimit(),
-//              accountCreatingDTO.transactionLimit(),
-//              "CURRENT",
-//              accountCreatingDTO.accountHolderId()
-//      );
-//      accountService.createAccount(checkingAccountDTO);
-//
-//      // Create savings account
-//      AccountCreatingDTO savingsAccountDTO = new AccountCreatingDTO(
-//              accountCreatingDTO.dayLimit(),
-//              accountCreatingDTO.absoluteLimit(),
-//              accountCreatingDTO.transactionLimit(),
-//              "SAVINGS",
-//              accountCreatingDTO.accountHolderId()
-//      );
       accountService.createAccount(accountCreatingDTO);
       userRepository.save(user);
       return true;
-    }catch (Exception e){
+    } catch (Exception e) {
       return false;
     }
   }
 
-  //   public User updateUserRole(Long userId, Role newRole) {
-//        Optional<User> userOptional = userRepository.findById(userId);
-//        if (userOptional.isPresent()) {
-//            User user = userOptional.get();
-//            user.setRole(newRole);
-//            return userRepository.save(user);
-//        } else {
-//            throw new IllegalArgumentException("User not found");
-//        }
-//    }
-//  public User getUserByEmail(String email) {
-//    return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
-//  }
-
-  // New method to get user details for the authenticated user
-  //this will be called as soon as client login and their Account overview displayed
   public UserDetailsDTO getUserDetails(User user) {
-    Account account = user.getAccounts().stream().findFirst()
-            .orElseThrow(() -> new EntityNotFoundException("Account not found for user: " + user.getEmail()));
+    List<AccountDTO> accountDTOs = user.getAccounts().stream().map(account ->
+            AccountDTO.builder()
+                    .iban(account.getIban())
+                    .accountBalance(account.getAccountBalance())
+                    .accountType(account.getAccountType())
+                    .build()
+    ).collect(Collectors.toList());
 
     return UserDetailsDTO.builder()
             .firstName(user.getFirstName())
             .lastName(user.getLastName())
-            .iban(account.getIban())
-            .accountBalance(account.getAccountBalance())
-            .accountType(account.getAccountType())
+            .accounts(accountDTOs)
             .build();
   }
 
@@ -122,8 +93,7 @@ public class UserService {
     PageRequest pageRequest = PageRequest.of(offset / limit, limit);
     Page<User> users;
     // Fetch users by approval status from the database
-    users= userRepository.findByIsApproved(isApproved, pageRequest);
+    users = userRepository.findByIsApproved(isApproved, pageRequest);
     return users.getContent();
   }
-
 }

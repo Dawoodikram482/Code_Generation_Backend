@@ -54,7 +54,7 @@ public class WebSecurityConfig {
         .requestMatchers("/h2-console/**").permitAll()
         .requestMatchers("/login").permitAll()
         .requestMatchers("/register").permitAll()
-        .requestMatchers("/users/**").permitAll()
+       .requestMatchers("/users/**").permitAll()
         .requestMatchers("/accounts").permitAll()
         .requestMatchers("/atm/**").permitAll()
         .requestMatchers("/transactions/**").permitAll()

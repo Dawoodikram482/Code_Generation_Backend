@@ -21,7 +21,6 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
 //    Page<User> findByRole(@NonNull Role role, @NonNull Pageable pageable);
 
 
-
   @Query("SELECT u FROM users u")
   Page<User> findAll(@NonNull Pageable pageable);
 
