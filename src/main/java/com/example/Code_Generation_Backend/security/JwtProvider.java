@@ -14,6 +14,7 @@ import java.security.PublicKey;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtProvider {
@@ -27,7 +28,7 @@ public class JwtProvider {
 
     public String createToken(String email, List<Role> roles) throws JwtException {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("auth", roles);
+        claims.put("auth", roles.stream().map(Role::getAuthority).collect(Collectors.joining(", ")));
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + 3600000);

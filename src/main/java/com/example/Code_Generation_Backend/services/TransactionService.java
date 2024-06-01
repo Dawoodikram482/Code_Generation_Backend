@@ -81,6 +81,7 @@ public class TransactionService {
 
   public Transaction Deposit(ATMTransactionDTO atmTransaction, String userPerforming) throws AccountNotFoundException {
     Account receiver = accountService.getAccountByIBAN(atmTransaction.IBAN());
+    System.out.println("receiver: " + receiver.getCustomer().isApproved());
     if (receiver == null) {
       throw new AccountNotFoundException("Account with IBAN: " + atmTransaction.IBAN() + " not found");
     }
@@ -93,17 +94,19 @@ public class TransactionService {
         LocalDate.now(),
         LocalTime.now(),
         user,
-        TransactionType.DEPOSIT
+        TransactionType.DEPOSIT,
+        atmTransaction.currencyType()
     );
     updateAccountBalance(receiver, atmTransaction.amount(), true);
     return transactionRepository.save(transaction);
   }
 
   boolean isUserAuthorizedToAccessAccount(User user, Account account) {
-    return user == account.getCustomer();
+    return ((user == account.getCustomer() || user.getRoles().contains(Role.ROLE_EMPLOYEE)) && account.isActive());
   }
 
   private void checkAccountPreconditionsForWithdrawOrDeposit(Account account, User user) throws IllegalArgumentException {
+
     if (!isUserAuthorizedToAccessAccount(user, account)) {
       throw new IllegalArgumentException("You are not the owner of this account");
     }
