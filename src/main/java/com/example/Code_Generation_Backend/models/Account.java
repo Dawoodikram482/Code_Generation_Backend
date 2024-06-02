@@ -51,4 +51,9 @@ public class Account {
       throw new IllegalArgumentException("Absolute limit cannot be negative");
     }
   }
+
+  // Method to set account type
+  public void setAccountType(AccountType accountType) {
+    this.accountType = accountType;
+  }
 }

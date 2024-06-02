@@ -1,22 +1,27 @@
 package com.example.Code_Generation_Backend.services;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
-import com.example.Code_Generation_Backend.DTOs.requestDTOs.RegisterDTO;
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.CustomerRegistrationDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO.AccountDTO;
 import com.example.Code_Generation_Backend.models.Account;
+import com.example.Code_Generation_Backend.models.AccountType;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
+import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Service
 public class UserService {
@@ -24,12 +29,18 @@ public class UserService {
   private final UserRepository userRepository;
   private final AccountService accountService;
 
+  @Autowired
+  private AccountRepository accountRepository;
+
+  @Autowired
+  private PasswordEncoder passwordEncoder;
+
   public UserService(UserRepository userRepository, AccountService accountService) {
     this.userRepository = userRepository;
     this.accountService = accountService;
   }
 
-  private final Function<RegisterDTO, User> registerDTOUserFunction = registerationDTO -> User.builder()
+  /*private final Function<RegisterDTO, User> registerDTOUserFunction = registerationDTO -> User.builder()
           .bsn(registerationDTO.bsn())
           .email(registerationDTO.email())
           .password(registerationDTO.password())
@@ -37,7 +48,7 @@ public class UserService {
           .lastName(registerationDTO.lastName())
           .phoneNumber(registerationDTO.phoneNumber())
           .dateOfBirth(LocalDate.parse(registerationDTO.dateOfBirth()))
-          .build();
+          .build();*/
 
   public User SaveUser(User user) {
     return userRepository.save(user);
@@ -96,4 +107,44 @@ public class UserService {
     users = userRepository.findByIsApproved(isApproved, pageRequest);
     return users.getContent();
   }
+
+  public User registerNewCustomer(CustomerRegistrationDTO dto) {
+    User user = new User();
+    user.setFirstName(dto.getFirstName());
+    user.setLastName(dto.getLastName());
+    user.setEmail(dto.getEmail());
+    user.setPhoneNumber(dto.getPhoneNumber());
+    user.setBsn(dto.getBsn());
+    user.setDateOfBirth(dto.getBirthDate());
+    user.setRoles(List.of(Role.ROLE_CUSTOMER));
+    user.setApproved(false);
+    user.setActive(true); // Assuming default active status is true
+
+    user = userRepository.save(user);
+
+    if (dto.getAccountType().equalsIgnoreCase("Savings") || dto.getAccountType().equalsIgnoreCase("Both")) {
+      Account savingsAccount = new Account();
+      savingsAccount.setUser(user);
+      savingsAccount.setAccountType(AccountType.SAVINGS);
+      accountRepository.save(savingsAccount);
+    }
+
+    if (dto.getAccountType().equalsIgnoreCase("Current") || dto.getAccountType().equalsIgnoreCase("Both")) {
+      Account currentAccount = new Account();
+      currentAccount.setUser(user);
+      currentAccount.setAccountType(AccountType.CURRENT);
+      accountRepository.save(currentAccount);
+    }
+
+    return user;
+  }
+
+  public void approveCustomer(Long userId) {
+    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID " + userId));
+    user.setApproved(true);
+    userRepository.save(user);
+  }
 }
+
+
+
