@@ -10,8 +10,9 @@ import com.example.Code_Generation_Backend.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
@@ -113,5 +114,15 @@ public class UserService {
   }
   public User getUserByEmail(String email) {
     return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
+  }
+
+  public List<User> getAllUsers(Pageable pageable, Role passingRole) {
+    Page<User> users;
+    if (passingRole != null) {
+      users = userRepository.findByRoles(passingRole, pageable);
+    } else {
+      users = userRepository.findAll(pageable);
+    }
+    return users.getContent();
   }
 }
