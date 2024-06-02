@@ -60,6 +60,7 @@ public class TransactionController {
   }
 
   @GetMapping("/account/{iban}")
+  @PreAuthorize("hasAnyRole('ROLE_CUSTOMER', 'ROLE_EMPLOYEE')")
   public ResponseEntity<Object> getTransactionsByAccount(@RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false)
                                                          int limit,
                                                          @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false)
