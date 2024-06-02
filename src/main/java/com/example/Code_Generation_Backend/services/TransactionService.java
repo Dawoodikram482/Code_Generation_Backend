@@ -173,11 +173,7 @@ public class TransactionService {
   }
 
   private void validateLimits(Account accountFrom, Account accountTo, double amount) {
-    if (accountFrom.getAbsoluteLimit() < amount) {
-      if (accountTo == null || (accountTo.getAccountType() != AccountType.SAVINGS && accountFrom.getAccountType() != AccountType.SAVINGS)) {
-        throw new TransactionLimitException("Absolute limit exceeded");
-      }
-    }
+
     if (accountFrom.getCustomer().getTransactionLimit() < amount) {
       throw new DailyLimitException("Cannot exceed daily transaction limit");
     }
