@@ -5,15 +5,16 @@ import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
-import com.example.Code_Generation_Backend.services.UserService;
 import com.example.Code_Generation_Backend.security.CustomUserDetails;
+import com.example.Code_Generation_Backend.services.UserService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +22,7 @@ import java.util.function.Function;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@Validated
 @RequestMapping("/users")
-@ControllerAdvice
 public class UserController {
     private final String DEFAULT_OFFSET_STRING = "0";
     private final String DEFAULT_LIMIT_STRING = "50";
@@ -47,7 +46,7 @@ public class UserController {
             throw new IllegalArgumentException(
                     "The role is not valid"); // this will be caught by RestControllerExceptionHandler
         }
-        List<User> users = userService.getAllUsers(limit, offset, passingRole);
+        List<User> users = userService.getAllUsers(getPagination(limit, offset),  passingRole);
         return ResponseEntity.ok(
                 users.parallelStream().map(mapUserObjectToDTO).toList()
                 // using Parallel Stream to improve performance
@@ -105,5 +104,9 @@ public class UserController {
                     user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
                     user.getDayLimit(),user.isApproved(), user.getTransactionLimit()
             );
+
+    private Pageable getPagination(int limit, int offset) {
+        return PageRequest.of(offset / limit, limit);
+    }
 }
 
