@@ -38,8 +38,8 @@ public class TransactionService {
     this.accountService = accountService;
   }
 
-  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalDate dateAfter, TransactionType type) {
-    List<Transaction> transactions = transactionRepository.getTransactions(pageable, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, dateAfter, type).getContent();
+  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
+    List<Transaction> transactions = transactionRepository.getTransactions(pageable, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type).getContent();
     if (transactions.isEmpty()) {
       throw new EntityNotFoundException("No transactions found for account with iban: " + ibanFrom);
     }
@@ -216,9 +216,10 @@ public class TransactionService {
     transaction.setAccountFrom(accountRepository.findById(transactionDTO.accountFrom()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + transactionDTO.accountFrom() + " not found.")));
     transaction.setAccountTo(accountRepository.findById(transactionDTO.accountTo()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + transactionDTO.accountTo() + " not found.")));
     transaction.setDate(LocalDate.now());
-    transaction.setTimestamp(LocalTime.now());
+    transaction.setTimestamp(LocalTime.now().withNano(0));
     transaction.setUserPerforming(initiator);
     transaction.setTransactionType(transactionType);
+    transaction.setCurrencyType(CurrencyType.EURO);
     return transaction;
   }
 

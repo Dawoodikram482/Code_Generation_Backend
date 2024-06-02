@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_LIMIT_STRING;
@@ -53,9 +54,9 @@ public class TransactionController {
       @RequestParam(required = false) Double amountMax,
       @RequestParam(required = false) Double amountMin,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime timestamp,
       @RequestParam(required = false) TransactionType type) {
-    List<TransactionResponseDTO> transactions = transactionService.getAllTransactions(getPagination(limit, offset), ibanFrom, ibanTo, amountMin, amountMax, dateFrom, dateTo, type);
+    List<TransactionResponseDTO> transactions = transactionService.getAllTransactions(getPagination(limit, offset), ibanFrom, ibanTo, amountMin, amountMax, dateFrom, timestamp, type);
     return ResponseEntity.ok().body(transactions);
   }
 
@@ -67,8 +68,19 @@ public class TransactionController {
                                                          int offset,
                                                          @PathVariable
                                                          String iban) {
-    List<TransactionResponseDTO> transactions = transactionService.getTransactions(getPagination(limit, offset), iban);
-    return ResponseEntity.ok().body(transactions);
+//    List<TransactionResponseDTO> transactions = transactionService.getTransactions(getPagination(limit, offset), iban);
+//    return ResponseEntity.ok().body(transactions);
+    try{
+      return ResponseEntity.status(HttpStatus.OK).body(transactionService.getTransactions(getPagination(limit, offset), iban));
+    }catch (Exception e){
+      if(e instanceof BadCredentialsException){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+      }
+      if(e instanceof AuthenticationException){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+      }
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
   }
 
   @PostMapping
