@@ -15,6 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
 import java.util.function.Function;
 
@@ -54,6 +55,29 @@ public class AccountController {
                 accounts.parallelStream().map(mapAccountObjectToDTO).toList()
                 // using Parallel Stream to improve performance
         );
+    };
+
+    /*@GetMapping("/search-iban")
+    public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
+        try {
+            Account account = accountService.getIbanByName(firstName, lastName);
+            return account.getIban();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "User does not exist"); // this will be caught by RestControllerExceptionHandler
+        } catch (AccountNotFoundException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }*/
+
+    @GetMapping("/search-iban")
+    public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
+        try {
+            return accountService.getIbanByName(firstName, lastName);
+        } catch (AccountNotFoundException e) {
+            return e.getMessage();
+        }
     }
 
     @PostMapping("/closeAccount/{iban}")

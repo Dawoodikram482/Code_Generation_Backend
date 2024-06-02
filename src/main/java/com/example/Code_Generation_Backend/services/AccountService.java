@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import javax.security.auth.login.AccountNotFoundException;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
@@ -87,6 +88,7 @@ public class AccountService {
         .build();
   }
 
+
   public boolean closeAccount(String iban) {
     try {
       Account account = accountRepository.findByIban(iban).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + iban + " not found"));
@@ -97,6 +99,21 @@ public class AccountService {
       return false;
     }
   }
+
+
+  /*public Account getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
+    return accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
+            .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
+  }*/
+
+  public String getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
+    Account account = accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
+            .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
+    return account.getIban();
+  }
+
+
+
   private String generateUniqueIBAN() {
     String iban;
     do {
@@ -104,4 +121,5 @@ public class AccountService {
     } while (accountRepository.existsByIban(iban));
     return iban;
   }
+
 }

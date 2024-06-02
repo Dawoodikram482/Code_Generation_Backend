@@ -2,12 +2,15 @@ package com.example.Code_Generation_Backend.controllers;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
+import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.UserService;
+import com.example.Code_Generation_Backend.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
@@ -83,11 +86,18 @@ public class UserController {
     }
 
 
-
     @PostMapping("/test-employee-role")
     @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
     public ResponseEntity<String> testEmployeeRole() {
         return ResponseEntity.ok("Role EMPLOYEE is recognized");
+    }
+
+    // Endpoint to get the authenticated user's details to display in the account overview
+    @GetMapping("/myAccountOverview")
+    public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        User user = customUserDetails.getUser();
+        UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
+        return ResponseEntity.ok(userDetailsDTO);
     }
 
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
@@ -96,3 +106,4 @@ public class UserController {
                     user.getDayLimit(),user.isApproved(), user.getTransactionLimit()
             );
 }
+
