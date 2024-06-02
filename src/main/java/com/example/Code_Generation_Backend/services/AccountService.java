@@ -7,6 +7,7 @@ import com.example.Code_Generation_Backend.models.AccountType;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.repositories.AccountRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -88,6 +89,18 @@ public class AccountService {
   }
 
 
+  public boolean closeAccount(String iban) {
+    try {
+      Account account = accountRepository.findByIban(iban).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + iban + " not found"));
+      account.setActive(false);
+      accountRepository.save(account);
+      return true;
+    }catch (Exception e){
+      return false;
+    }
+  }
+
+
   /*public Account getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
     return accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
             .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
@@ -98,6 +111,7 @@ public class AccountService {
             .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
     return account.getIban();
   }
+
 
 
   private String generateUniqueIBAN() {
