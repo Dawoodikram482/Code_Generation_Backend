@@ -52,6 +52,7 @@ public class UserController {
                 // using Parallel Stream to improve performance
         );
     }
+
     @GetMapping("/pending-approvals")
     public ResponseEntity<Object> getPendingApprovals(
             @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
@@ -74,10 +75,10 @@ public class UserController {
             userService.approveUser(userId, creatingDTO);
             return ResponseEntity.status(HttpStatus.OK).body(new Object[0]);
         } catch (Exception e) {
-            if(e instanceof BadCredentialsException){
+            if (e instanceof BadCredentialsException) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
             }
-            if(e instanceof AuthenticationException){
+            if (e instanceof AuthenticationException) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -93,6 +94,7 @@ public class UserController {
 
     // Endpoint to get the authenticated user's details to display in the account overview
     @GetMapping("/myAccountOverview")
+    @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
     public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         User user = customUserDetails.getUser();
         UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
@@ -102,11 +104,10 @@ public class UserController {
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
             new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
                     user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
-                    user.getDayLimit(),user.isApproved(), user.getTransactionLimit()
+                    user.getDayLimit(), user.isApproved(), user.getTransactionLimit()
             );
 
     private Pageable getPagination(int limit, int offset) {
         return PageRequest.of(offset / limit, limit);
     }
 }
-
