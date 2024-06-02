@@ -21,12 +21,14 @@ public class Transaction {
   private Account accountFrom;
   private LocalDate date;
   private LocalTime timestamp;
-  @OneToOne
+  @ManyToOne
   private User userPerforming;
   @Enumerated(EnumType.ORDINAL)
   private TransactionType transactionType;
+  @Enumerated(EnumType.ORDINAL)
+  private CurrencyType currencyType;
   public Transaction(Double amount, Account accountTo, Account accountFrom, LocalDate localDate,
-      LocalTime localTime, User userPerforming, TransactionType transactionType) {
+      LocalTime localTime, User userPerforming, TransactionType transactionType, CurrencyType currencyType) {
     this.amount = amount;
     this.accountTo = accountTo;
     this.accountFrom = accountFrom;
@@ -34,6 +36,7 @@ public class Transaction {
     this.timestamp = localTime;
     this.userPerforming = userPerforming;
     this.transactionType = transactionType;
+    this.currencyType = currencyType;
   }
   public void setAmount(double amount) {
       if (amount <= 0) {

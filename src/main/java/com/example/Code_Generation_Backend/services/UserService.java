@@ -13,10 +13,10 @@ import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.Instant;
@@ -84,6 +84,8 @@ public class UserService {
     }
   }
 
+  // New method to get user details for the authenticated user
+  //this will be called as soon as client login and their Account overview displayed
   public UserDetailsDTO getUserDetails(User user) {
     List<AccountDTO> accountDTOs = user.getAccounts().stream().map(account ->
             AccountDTO.builder()
@@ -105,6 +107,19 @@ public class UserService {
     Page<User> users;
     // Fetch users by approval status from the database
     users = userRepository.findByIsApproved(isApproved, pageRequest);
+    return users.getContent();
+  }
+  public User getUserByEmail(String email) {
+    return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
+  }
+
+  public List<User> getAllUsers(Pageable pageable, Role passingRole) {
+    Page<User> users;
+    if (passingRole != null) {
+      users = userRepository.findByRoles(passingRole, pageable);
+    } else {
+      users = userRepository.findAll(pageable);
+    }
     return users.getContent();
   }
 

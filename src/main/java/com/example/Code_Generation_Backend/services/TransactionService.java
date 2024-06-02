@@ -38,8 +38,8 @@ public class TransactionService {
     this.accountService = accountService;
   }
 
-  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalDate dateAfter, TransactionType type) {
-    List<Transaction> transactions = transactionRepository.getTransactions(pageable, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, dateAfter, type).getContent();
+  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
+    List<Transaction> transactions = transactionRepository.getTransactions(pageable, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type).getContent();
     if (transactions.isEmpty()) {
       throw new EntityNotFoundException("No transactions found for account with iban: " + ibanFrom);
     }
@@ -81,6 +81,7 @@ public class TransactionService {
 
 /*  public Transaction Deposit(ATMTransactionDTO atmTransaction, String userPerforming) throws AccountNotFoundException {
     Account receiver = accountService.getAccountByIBAN(atmTransaction.IBAN());
+    System.out.println("receiver: " + receiver.getCustomer().isApproved());
     if (receiver == null) {
       throw new AccountNotFoundException("Account with IBAN: " + atmTransaction.IBAN() + " not found");
     }
@@ -93,17 +94,19 @@ public class TransactionService {
         LocalDate.now(),
         LocalTime.now(),
         user,
-        TransactionType.DEPOSIT
+        TransactionType.DEPOSIT,
+        atmTransaction.currencyType()
     );
     updateAccountBalance(receiver, atmTransaction.amount(), true);
     return transactionRepository.save(transaction);
   }*/
 
   boolean isUserAuthorizedToAccessAccount(User user, Account account) {
-    return user == account.getCustomer();
+    return ((user == account.getCustomer() || user.getRoles().contains(Role.ROLE_EMPLOYEE)) && account.isActive());
   }
 
   private void checkAccountPreconditionsForWithdrawOrDeposit(Account account, User user) throws IllegalArgumentException {
+
     if (!isUserAuthorizedToAccessAccount(user, account)) {
       throw new IllegalArgumentException("You are not the owner of this account");
     }
@@ -170,11 +173,7 @@ public class TransactionService {
   }
 
   private void validateLimits(Account accountFrom, Account accountTo, double amount) {
-    if (accountFrom.getAbsoluteLimit() < amount) {
-      if (accountTo == null || (accountTo.getAccountType() != AccountType.SAVINGS && accountFrom.getAccountType() != AccountType.SAVINGS)) {
-        throw new TransactionLimitException("Absolute limit exceeded");
-      }
-    }
+
     if (accountFrom.getCustomer().getTransactionLimit() < amount) {
       throw new DailyLimitException("Cannot exceed daily transaction limit");
     }
@@ -217,9 +216,10 @@ public class TransactionService {
     transaction.setAccountFrom(accountRepository.findById(transactionDTO.accountFrom()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + transactionDTO.accountFrom() + " not found.")));
     transaction.setAccountTo(accountRepository.findById(transactionDTO.accountTo()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + transactionDTO.accountTo() + " not found.")));
     transaction.setDate(LocalDate.now());
-    transaction.setTimestamp(LocalTime.now());
+    transaction.setTimestamp(LocalTime.now().withNano(0));
     transaction.setUserPerforming(initiator);
     transaction.setTransactionType(transactionType);
+    transaction.setCurrencyType(CurrencyType.EURO);
     return transaction;
   }
 
