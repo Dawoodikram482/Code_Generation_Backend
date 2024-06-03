@@ -6,7 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-//this is what the client see in their account overview
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -14,7 +15,15 @@ import lombok.NoArgsConstructor;
 public class UserDetailsDTO {
     private String firstName;
     private String lastName;
-    private String iban;
-    private double accountBalance;
-    private AccountType accountType;
+    private List<AccountDTO> accounts;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AccountDTO {
+        private String iban;
+        private double accountBalance;
+        private AccountType accountType;
+    }
 }
