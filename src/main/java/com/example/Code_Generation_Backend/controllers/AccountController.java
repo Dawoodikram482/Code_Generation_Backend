@@ -36,7 +36,7 @@ public class AccountController {
         this.userService = userService;
     }
 
-    @GetMapping
+    /*@GetMapping
     public ResponseEntity<Object> getAllAccounts(
             @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
             @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset,
@@ -55,7 +55,7 @@ public class AccountController {
                 accounts.parallelStream().map(mapAccountObjectToDTO).toList()
                 // using Parallel Stream to improve performance
         );
-    };
+    };*/
 
 
     @GetMapping("/search-iban")
@@ -96,8 +96,8 @@ public class AccountController {
 //    private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account ->
 //            new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer().getFullName());
 
-    private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
-            new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()));
+    /*private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
+            new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()));*/
 }
 
 
