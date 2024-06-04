@@ -15,6 +15,7 @@ import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,15 +47,6 @@ public class UserService {
     this.accountService = accountService;
   }
 
-  /*private final Function<RegisterDTO, User> registerDTOUserFunction = registerationDTO -> User.builder()
-          .bsn(registerationDTO.bsn())
-          .email(registerationDTO.email())
-          .password(registerationDTO.password())
-          .firstName(registerationDTO.firstName())
-          .lastName(registerationDTO.lastName())
-          .phoneNumber(registerationDTO.phoneNumber())
-          .dateOfBirth(LocalDate.parse(registerationDTO.dateOfBirth()))
-          .build();*/
 
   public User SaveUser(User user) {
     return userRepository.save(user);
@@ -130,6 +122,13 @@ public class UserService {
   }
 
   public User registerNewCustomer(CustomerRegistrationDTO dto) {
+    // Check if a user with the same BSN or email already exists
+    if (userRepository.existsByBsn(dto.getBsn())) {
+      throw new DataIntegrityViolationException("User with BSN " + dto.getBsn() + " already exists.");
+    }
+    if (userRepository.existsByEmail(dto.getEmail())) {
+      throw new DataIntegrityViolationException("User with email " + dto.getEmail() + " already exists.");
+    }
     User user = new User();
     user.setFirstName(dto.getFirstName());
     user.setLastName(dto.getLastName());
@@ -137,28 +136,15 @@ public class UserService {
     user.setPhoneNumber(dto.getPhoneNumber());
     user.setBsn(dto.getBsn());
     user.setDateOfBirth(dto.getBirthDate());
+    user.setPassword(passwordEncoder.encode(dto.getPassword()));
     user.setRoles(List.of(Role.ROLE_CUSTOMER));
     user.setApproved(false);
     user.setActive(true); // Assuming default active status is true
-
+    // Save the user first to get an ID for the relationships
     user = userRepository.save(user);
-
-    if (dto.getAccountType().equalsIgnoreCase("Savings") || dto.getAccountType().equalsIgnoreCase("Both")) {
-      Account savingsAccount = new Account();
-      savingsAccount.setUser(user);
-      savingsAccount.setAccountType(AccountType.SAVINGS);
-      accountRepository.save(savingsAccount);
-    }
-
-    if (dto.getAccountType().equalsIgnoreCase("Current") || dto.getAccountType().equalsIgnoreCase("Both")) {
-      Account currentAccount = new Account();
-      currentAccount.setUser(user);
-      currentAccount.setAccountType(AccountType.CURRENT);
-      accountRepository.save(currentAccount);
-    }
-
     return user;
   }
+
 
   public void approveCustomer(Long userId) {
     User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID " + userId));
