@@ -1,12 +1,8 @@
 package com.example.Code_Generation_Backend.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -34,6 +30,7 @@ public class Account {
   private AccountType accountType;
 
   @ManyToOne
+  @JoinColumn(name = "user_id")
   private User customer;
 
   public void setAccountBalance(double accountBalance) {
@@ -55,5 +52,9 @@ public class Account {
   // Method to set account type
   public void setAccountType(AccountType accountType) {
     this.accountType = accountType;
+  }
+
+  public void setUser(User user)
+  {
   }
 }
