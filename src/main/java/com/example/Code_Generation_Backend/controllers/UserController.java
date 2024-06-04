@@ -1,8 +1,10 @@
 package com.example.Code_Generation_Backend.controllers;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
+import com.example.Code_Generation_Backend.DTOs.responseDTOs.AccountDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
+import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.security.CustomUserDetails;
@@ -15,10 +17,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -32,7 +36,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
+    /*@GetMapping
     public ResponseEntity<Object> getAllUsers(
             @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
             @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset,
@@ -51,7 +55,7 @@ public class UserController {
                 users.parallelStream().map(mapUserObjectToDTO).toList()
                 // using Parallel Stream to improve performance
         );
-    }
+    }*/
 
     @GetMapping("/pending-approvals")
     public ResponseEntity<Object> getPendingApprovals(
@@ -93,14 +97,21 @@ public class UserController {
     }
 
     // Endpoint to get the authenticated user's details to display in the account overview
-    @GetMapping("/myAccountOverview")
-    @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
+ /*   @GetMapping("/myAccountOverview")
+     @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
     public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         User user = customUserDetails.getUser();
         UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
         return ResponseEntity.ok(userDetailsDTO);
-    }
+    }*/
+    @GetMapping("/myAccountOverview")
+    @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
 
+    public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserByEmail(userDetails.getUsername());
+        UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
+        return ResponseEntity.ok(userDetailsDTO);
+    }
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
             new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
                     user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
