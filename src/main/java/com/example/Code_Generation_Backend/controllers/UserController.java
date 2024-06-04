@@ -1,6 +1,7 @@
 package com.example.Code_Generation_Backend.controllers;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.CustomerRegistrationDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.AccountDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
@@ -9,6 +10,7 @@ import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.security.CustomUserDetails;
 import com.example.Code_Generation_Backend.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -36,7 +38,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    /*@GetMapping
+    @GetMapping
     public ResponseEntity<Object> getAllUsers(
             @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
             @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset,
@@ -50,12 +52,12 @@ public class UserController {
             throw new IllegalArgumentException(
                     "The role is not valid"); // this will be caught by RestControllerExceptionHandler
         }
-        List<User> users = userService.getAllUsers(getPagination(limit, offset),  passingRole);
+        List<User> users = userService.getAllUsers(limit, offset,  passingRole);
         return ResponseEntity.ok(
                 users.parallelStream().map(mapUserObjectToDTO).toList()
                 // using Parallel Stream to improve performance
         );
-    }*/
+    }
 
     @GetMapping("/pending-approvals")
     public ResponseEntity<Object> getPendingApprovals(
@@ -89,21 +91,6 @@ public class UserController {
         }
     }
 
-
-    @PostMapping("/test-employee-role")
-    @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
-    public ResponseEntity<String> testEmployeeRole() {
-        return ResponseEntity.ok("Role EMPLOYEE is recognized");
-    }
-
-    // Endpoint to get the authenticated user's details to display in the account overview
- /*   @GetMapping("/myAccountOverview")
-     @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
-    public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        User user = customUserDetails.getUser();
-        UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
-        return ResponseEntity.ok(userDetailsDTO);
-    }*/
     @GetMapping("/myAccountOverview")
     @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
 
@@ -120,5 +107,10 @@ public class UserController {
 
     private Pageable getPagination(int limit, int offset) {
         return PageRequest.of(offset / limit, limit);
+    }
+    @PostMapping("/register")
+    public ResponseEntity<User> registerCustomer(@Valid @RequestBody CustomerRegistrationDTO dto) {
+        User user = userService.registerNewCustomer(dto);
+        return ResponseEntity.ok(user);
     }
 }

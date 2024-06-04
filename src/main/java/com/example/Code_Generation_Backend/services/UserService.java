@@ -62,16 +62,17 @@ public class UserService
     return userRepository.save(user);
   }
 
-  /*public List<User> getAllUsers(int limit, int offset, Role passingRole) {
+  public List<User> getAllUsers(int limit, int offset, Role passingRole) {
     PageRequest pageRequest = PageRequest.of(offset / limit, limit);
     Page<User> users;
     if (passingRole != null) {
       users = userRepository.findByRoles(passingRole, pageRequest);
-    } else {
+    }
+    else {
       users = userRepository.findAll(pageRequest);
     }
     return users.getContent();
-  }*/
+  }
 
   public User getUserById(Long Id)
   {
@@ -136,19 +137,8 @@ public class UserService
   public User getUserByEmail(String email) {
     return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
   }
-}
 
-  /*public List<User> getAllUsers(Pageable pageable, Role passingRole) {
-    Page<User> users;
-    if (passingRole != null) {
-      users = userRepository.findByRoles(passingRole, pageable);
-    } else {
-      users = userRepository.findAll(pageable);
-    }
-    return users.getContent();
-  }
-
-  /*public User registerNewCustomer(CustomerRegistrationDTO dto) {
+  public User registerNewCustomer(CustomerRegistrationDTO dto) {
     User user = new User();
     user.setFirstName(dto.getFirstName());
     user.setLastName(dto.getLastName());
@@ -184,7 +174,7 @@ public class UserService
     user.setApproved(true);
     userRepository.save(user);
   }
-}*/
+}
 
 
 
