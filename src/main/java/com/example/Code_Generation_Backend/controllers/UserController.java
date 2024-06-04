@@ -22,7 +22,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -102,32 +104,33 @@ public class UserController {
     @GetMapping("/myAccountOverview")
     @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
 
-    public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getUserByEmail(userDetails.getUsername());
-        UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
-        return ResponseEntity.ok(userDetailsDTO);
+        public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal UserDetails userDetails) {
+            User user = userService.getUserByEmail(userDetails.getUsername());
+            UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
+            return ResponseEntity.ok(userDetailsDTO);
+
+
     }
+
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
             new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
                     user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
                     user.getDayLimit(), user.isApproved(), user.getTransactionLimit()
             );
 
-//    private Pageable getPagination(int limit, int offset) {
-//        return PageRequest.of(offset / limit, limit);
-//    }
-//}
+ private Pageable getPagination(int limit, int offset) {
+      return PageRequest.of(offset / limit, limit);
+  }
+
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerCustomer(@Valid @RequestBody CustomerRegistrationDTO dto) {
+    public ResponseEntity<Map<String, Object>> registerCustomer(@Valid @RequestBody CustomerRegistrationDTO dto) {
         User user = userService.registerNewCustomer(dto);
-        return ResponseEntity.ok(user);
-    }
-
-    @PutMapping("/approve/{userId}")
-    public ResponseEntity<Void> approveCustomer(@PathVariable Long userId) {
-        userService.approveCustomer(userId);
-        return ResponseEntity.ok().build();
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Your registration is successful and being processed");
+        response.put("data", user);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 }

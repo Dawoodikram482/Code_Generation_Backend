@@ -18,9 +18,9 @@ Optional<User> findByEmail(String email);
 //    Optional<User> findByBsn(String bsn);
 //    boolean existsByEmailEqualsIgnoreCase(String email);
 //    boolean existsByBsn(String bsn);
-//    Page<User> findByRole(@NonNull Role role, @NonNull Pageable pageable);
+    Page<User> findByRole(@NonNull Role role, @NonNull Pageable pageable);
 
-
+    //to check during registration if user already exist based on their bsn and email
     boolean existsByBsn(String bsn);
     boolean existsByEmail(String email);
 

@@ -48,31 +48,12 @@ public class UserService
     this.accountService = accountService;
   }
 
-  /*private final Function<RegisterDTO, User> registerDTOUserFunction = registerationDTO -> User.builder()
-          .bsn(registerationDTO.bsn())
-          .email(registerationDTO.email())
-          .password(registerationDTO.password())
-          .firstName(registerationDTO.firstName())
-          .lastName(registerationDTO.lastName())
-          .phoneNumber(registerationDTO.phoneNumber())
-          .dateOfBirth(LocalDate.parse(registerationDTO.dateOfBirth()))
-          .build();*/
 
   public User SaveUser(User user)
   {
     return userRepository.save(user);
   }
 
-  /*public List<User> getAllUsers(int limit, int offset, Role passingRole) {
-    PageRequest pageRequest = PageRequest.of(offset / limit, limit);
-    Page<User> users;
-    if (passingRole != null) {
-      users = userRepository.findByRoles(passingRole, pageRequest);
-    } else {
-      users = userRepository.findAll(pageRequest);
-    }
-    return users.getContent();
-  }*/
 
   public User getUserById(Long Id)
   {
@@ -139,7 +120,7 @@ public class UserService
   }
 
 
-  /*public List<User> getAllUsers(Pageable pageable, Role passingRole) {
+ /* public List<User> getAllUsers(Pageable pageable, Role passingRole) {
     Page<User> users;
     if (passingRole != null) {
       users = userRepository.findByRoles(passingRole, pageable);
@@ -164,35 +145,16 @@ public class UserService
     user.setPhoneNumber(dto.getPhoneNumber());
     user.setBsn(dto.getBsn());
     user.setDateOfBirth(dto.getBirthDate());
+    user.setPassword(passwordEncoder.encode(dto.getPassword()));
     user.setRoles(List.of(Role.ROLE_CUSTOMER));
     user.setApproved(false);
     user.setActive(true); // Assuming default active status is true
-
     // Save the user first to get an ID for the relationships
     user = userRepository.save(user);
-
-    if (dto.getAccountType().equalsIgnoreCase("Savings") || dto.getAccountType().equalsIgnoreCase("Both")) {
-      Account savingsAccount = new Account();
-      savingsAccount.setCustomer(user);
-      savingsAccount.setAccountType(AccountType.SAVINGS);
-      accountRepository.save(savingsAccount);
-    }
-
-    if (dto.getAccountType().equalsIgnoreCase("Current") || dto.getAccountType().equalsIgnoreCase("Both")) {
-      Account currentAccount = new Account();
-      currentAccount.setCustomer(user);
-      currentAccount.setAccountType(AccountType.CURRENT);
-      accountRepository.save(currentAccount);
-    }
-
     return user;
   }
 
-  public void approveCustomer(Long userId) {
-    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID " + userId));
-    user.setApproved(true);
-    userRepository.save(user);
-  }
+
 }
 
 

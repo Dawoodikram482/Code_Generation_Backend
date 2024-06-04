@@ -34,6 +34,9 @@ public class CustomerRegistrationDTO {
     @NotBlank
     private String accountType;
 
+    @NotBlank
+    private String password;
+
     // Getters and setters
 
     public void setFirstName(String firstName) {
