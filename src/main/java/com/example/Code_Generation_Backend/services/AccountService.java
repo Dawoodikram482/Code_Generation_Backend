@@ -1,5 +1,6 @@
 package com.example.Code_Generation_Backend.services;
 
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.AbsoluteLimitRequestDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.generators.IBANGenerator;
 import com.example.Code_Generation_Backend.models.Account;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+
 import javax.security.auth.login.AccountNotFoundException;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -30,10 +32,11 @@ public class AccountService {
   private final AccountRepository accountRepository;
   private final UserService userService;
   private final IBANGenerator ibanGenerator;
+
   public AccountService(AccountRepository accountRepository, @Lazy UserService userService) {
     this.accountRepository = accountRepository;
     this.userService = userService;
-      this.ibanGenerator =  new IBANGenerator(new Random());
+    this.ibanGenerator = new IBANGenerator(new Random());
   }
 
 
@@ -98,7 +101,7 @@ public class AccountService {
       account.setActive(false);
       accountRepository.save(account);
       return true;
-    }catch (Exception e){
+    } catch (Exception e) {
       return false;
     }
   }
@@ -108,10 +111,9 @@ public class AccountService {
 
   public String getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
     Account account = accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
-            .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
+        .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
     return account.getIban();
   }
-
 
 
   private String generateUniqueIBAN() {
@@ -122,4 +124,11 @@ public class AccountService {
     return iban;
   }
 
+  public Account updateAbsoluteLimit(Account account, AbsoluteLimitRequestDTO absoluteLimitRequest) {
+    if (account.getAccountType().equals(AccountType.SAVINGS)) {
+      throw new IllegalArgumentException("Cannot update absolute limit for saving account");
+    }
+    account.setAbsoluteLimit(absoluteLimitRequest.absoluteLimit());
+    return accountRepository.save(account);
+  }
 }

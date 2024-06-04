@@ -30,6 +30,7 @@ public class TransactionService {
   private final UserService userService;
   private final UserRepository userRepository;
   private final AccountService accountService;
+
   public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, UserService userService, UserRepository userRepository, AccountService accountService) {
     this.transactionRepository = transactionRepository;
     this.accountRepository = accountRepository;
@@ -63,25 +64,9 @@ public class TransactionService {
     accountService.saveAccount(account);
   }
 
-  public void processATMTransaction(ATMTransactionDTO atmTransactionDTO) {
-//    Account account = accountRepository.findById(atmTransactionDTO.account()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + atmTransactionDTO.account() + " not found."));
-//
-//    if (atmTransactionDTO.action().equals("deposit")) {
-//      increaseBalance(atmTransactionDTO.amount(), atmTransactionDTO.account());
-//    } else if (atmTransactionDTO.action().equals("withdraw")) {
-//      // check if the account has enough balance  to withdraw
-//
-//      if (account.getAccountBalance() < atmTransactionDTO.amount()) {
-//        throw new InsufficientBalanceException("Insufficient balance");
-//      }
-//
-//      decreaseBalance(atmTransactionDTO.amount(), atmTransactionDTO.account());
-//    }
-  }
 
-/*  public Transaction Deposit(ATMTransactionDTO atmTransaction, String userPerforming) throws AccountNotFoundException {
+  public Transaction Deposit(ATMTransactionDTO atmTransaction, String userPerforming) throws AccountNotFoundException {
     Account receiver = accountService.getAccountByIBAN(atmTransaction.IBAN());
-    System.out.println("receiver: " + receiver.getCustomer().isApproved());
     if (receiver == null) {
       throw new AccountNotFoundException("Account with IBAN: " + atmTransaction.IBAN() + " not found");
     }
@@ -99,7 +84,27 @@ public class TransactionService {
     );
     updateAccountBalance(receiver, atmTransaction.amount(), true);
     return transactionRepository.save(transaction);
-  }*/
+  }
+  public Transaction withdraw(ATMTransactionDTO atmTransactionDTO, String userPerforming) throws AccountNotFoundException {
+    Account withDrawer = accountService.getAccountByIBAN(atmTransactionDTO.IBAN());
+    if (withDrawer == null) {
+      throw new AccountNotFoundException("Account with IBAN: " + atmTransactionDTO.IBAN() + " not found");
+    }
+    User user = userService.getUserByEmail(userPerforming);
+    checkAccountPreconditionsForWithdrawOrDeposit(withDrawer, user);
+    Transaction transaction = new Transaction(
+        atmTransactionDTO.amount(),
+        null,
+        withDrawer,
+        LocalDate.now(),
+        LocalTime.now(),
+        user,
+        TransactionType.WITHDRAWAL,
+        atmTransactionDTO.currencyType()
+    );
+    updateAccountBalance(withDrawer, atmTransactionDTO.amount(), false);
+    return transactionRepository.save(transaction);
+  }
 
   boolean isUserAuthorizedToAccessAccount(User user, Account account) {
     return ((user == account.getCustomer() || user.getRoles().contains(Role.ROLE_EMPLOYEE)) && account.isActive());

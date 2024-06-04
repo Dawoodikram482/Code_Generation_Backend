@@ -105,7 +105,7 @@ public class TransactionController {
     return null;
   }
 
- /* @PostMapping("/atm/deposit")
+  @PostMapping("/atm/deposit")
   @PreAuthorize("hasAnyRole('ROLE_CUSTOMER', 'ROLE_EMPLOYEE')")
   public ResponseEntity<Object> deposit(@RequestBody ATMTransactionDTO atmTransactionDTO, @AuthenticationPrincipal UserDetails jwtUser) {
     try{
@@ -119,8 +119,22 @@ public class TransactionController {
       }
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
-  }*/
-
+  }
+  @PostMapping("/atm/withdraw")
+  @PreAuthorize("hasAnyRole('ROLE_CUSTOMER', 'ROLE_EMPLOYEE')")
+  public ResponseEntity<Object> withdraw(@RequestBody ATMTransactionDTO atmTransactionDTO, @AuthenticationPrincipal UserDetails jwtUser) {
+    try{
+      return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.withdraw(atmTransactionDTO, jwtUser.getUsername()));
+    } catch (Exception e) {
+      if (e instanceof BadCredentialsException) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+      }
+      if(e instanceof AuthenticationException){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+      }
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+  }
   @GetMapping("/atm/withdraw")
   public ResponseEntity<Object> getWithdrawals() {
     try {

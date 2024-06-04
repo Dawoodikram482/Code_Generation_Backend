@@ -28,6 +28,6 @@ Optional<User> findByEmail(String email);
   Page<User> findByRoles(Role passingRole, Pageable pageRequest);
 
   Page<User> findByIsApproved(boolean isApproved, Pageable pageRequest);
-
+  Page<User> findAll(Pageable pageRequest);
 }
 
