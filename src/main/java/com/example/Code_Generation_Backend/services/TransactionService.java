@@ -39,8 +39,8 @@ public class TransactionService {
     this.accountService = accountService;
   }
 
-  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
-    List<Transaction> transactions = transactionRepository.getTransactions(pageable, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type).getContent();
+  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, Long id,String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
+    List<Transaction> transactions = transactionRepository.getTransactions(pageable, id, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type).getContent();
     if (transactions.isEmpty()) {
       throw new EntityNotFoundException("No transactions found for account with iban: " + ibanFrom);
     }
