@@ -1,6 +1,7 @@
 package com.example.Code_Generation_Backend.controllers;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.CustomerRegistrationDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.AccountDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
@@ -9,6 +10,7 @@ import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.security.CustomUserDetails;
 import com.example.Code_Generation_Backend.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -96,14 +98,7 @@ public class UserController {
         return ResponseEntity.ok("Role EMPLOYEE is recognized");
     }
 
-    // Endpoint to get the authenticated user's details to display in the account overview
- /*   @GetMapping("/myAccountOverview")
-     @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
-    public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        User user = customUserDetails.getUser();
-        UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
-        return ResponseEntity.ok(userDetailsDTO);
-    }*/
+
     @GetMapping("/myAccountOverview")
     @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
 
@@ -118,7 +113,21 @@ public class UserController {
                     user.getDayLimit(), user.isApproved(), user.getTransactionLimit()
             );
 
-    private Pageable getPagination(int limit, int offset) {
-        return PageRequest.of(offset / limit, limit);
+//    private Pageable getPagination(int limit, int offset) {
+//        return PageRequest.of(offset / limit, limit);
+//    }
+//}
+
+    @PostMapping("/register")
+    public ResponseEntity<User> registerCustomer(@Valid @RequestBody CustomerRegistrationDTO dto) {
+        User user = userService.registerNewCustomer(dto);
+        return ResponseEntity.ok(user);
     }
+
+    @PutMapping("/approve/{userId}")
+    public ResponseEntity<Void> approveCustomer(@PathVariable Long userId) {
+        userService.approveCustomer(userId);
+        return ResponseEntity.ok().build();
+    }
+
 }

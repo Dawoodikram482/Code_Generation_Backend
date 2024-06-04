@@ -54,7 +54,7 @@ public class Account {
     this.accountType = accountType;
   }
 
-  public void setUser(User user)
-  {
+  public void setCustomer(User customer) {
+    this.customer = customer;
   }
 }

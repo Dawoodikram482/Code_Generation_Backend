@@ -14,6 +14,7 @@ import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -136,7 +137,7 @@ public class UserService
   public User getUserByEmail(String email) {
     return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
   }
-}
+
 
   /*public List<User> getAllUsers(Pageable pageable, Role passingRole) {
     Page<User> users;
@@ -146,9 +147,16 @@ public class UserService
       users = userRepository.findAll(pageable);
     }
     return users.getContent();
-  }
+  }*/
 
-  /*public User registerNewCustomer(CustomerRegistrationDTO dto) {
+  public User registerNewCustomer(CustomerRegistrationDTO dto) {
+    // Check if a user with the same BSN or email already exists
+    if (userRepository.existsByBsn(dto.getBsn())) {
+      throw new DataIntegrityViolationException("User with BSN " + dto.getBsn() + " already exists.");
+    }
+    if (userRepository.existsByEmail(dto.getEmail())) {
+      throw new DataIntegrityViolationException("User with email " + dto.getEmail() + " already exists.");
+    }
     User user = new User();
     user.setFirstName(dto.getFirstName());
     user.setLastName(dto.getLastName());
@@ -160,18 +168,19 @@ public class UserService
     user.setApproved(false);
     user.setActive(true); // Assuming default active status is true
 
+    // Save the user first to get an ID for the relationships
     user = userRepository.save(user);
 
     if (dto.getAccountType().equalsIgnoreCase("Savings") || dto.getAccountType().equalsIgnoreCase("Both")) {
       Account savingsAccount = new Account();
-      savingsAccount.setUser(user);
+      savingsAccount.setCustomer(user);
       savingsAccount.setAccountType(AccountType.SAVINGS);
       accountRepository.save(savingsAccount);
     }
 
     if (dto.getAccountType().equalsIgnoreCase("Current") || dto.getAccountType().equalsIgnoreCase("Both")) {
       Account currentAccount = new Account();
-      currentAccount.setUser(user);
+      currentAccount.setCustomer(user);
       currentAccount.setAccountType(AccountType.CURRENT);
       accountRepository.save(currentAccount);
     }
@@ -184,7 +193,7 @@ public class UserService
     user.setApproved(true);
     userRepository.save(user);
   }
-}*/
+}
 
 
 

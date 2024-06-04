@@ -21,6 +21,10 @@ Optional<User> findByEmail(String email);
 //    Page<User> findByRole(@NonNull Role role, @NonNull Pageable pageable);
 
 
+    boolean existsByBsn(String bsn);
+    boolean existsByEmail(String email);
+
+
   Page<User> findByRoles(Role passingRole, Pageable pageRequest);
 
   Page<User> findByIsApproved(boolean isApproved, Pageable pageRequest);
