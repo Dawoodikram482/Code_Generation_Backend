@@ -187,6 +187,14 @@ components:
         absolute_limit:
           type: number
           format: double
+    UserLimitsRequest:
+      type: object
+      properties:
+        dailyLimit:
+          type: number
+          format: double
+          maximum: 1000000
+          minimum: 0
     UserResponse:
       type: object
       properties:
@@ -816,6 +824,50 @@ paths:
           $ref: '#/components/responses/InternalServerError'
         '400':
           $ref: '#/components/responses/BadRequest'
+  /users/{user_id}/limits:
+    put:
+      tags:
+        - User
+        - Employee
+        - Client
+      security:
+        - bearerAuth: [ ]
+      description: >
+        Updates the user limits.<br>
+        Only Employee can edit User limits.
+        'dailyLimit' refers to the maximum amount of money that can be transferred from the user during a single day.
+      operationId: updateUserLimits
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLimitsRequest"
+            example:
+              daily_transaction_limit: 10000
+      responses:
+        "200":
+          description: User limits have been updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+              example:
+                transaction_limit: 1000
+                daily_transaction_limit: 10000
+                remaining_daily_transaction_limit: 5420.69
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/AccountNotFound"
   /transactions:
     get:
       tags:
