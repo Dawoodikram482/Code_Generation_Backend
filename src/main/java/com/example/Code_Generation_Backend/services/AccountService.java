@@ -28,6 +28,7 @@ import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_SAVIN
 @Service
 public class AccountService {
 
+
   private final AccountRepository accountRepository;
   private final UserService userService;
   private final IBANGenerator ibanGenerator;
@@ -37,6 +38,8 @@ public class AccountService {
     this.userService = userService;
     this.ibanGenerator = new IBANGenerator(new Random());
   }
+
+
 
   // this method is used for internal working with app No new account should be made from user side
   // because it doesn't check account creation limit
@@ -104,10 +107,7 @@ public class AccountService {
   }
 
 
-  /*public Account getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
-    return accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
-            .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
-  }*/
+
 
   public String getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
     Account account = accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
