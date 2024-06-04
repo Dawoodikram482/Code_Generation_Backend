@@ -53,10 +53,11 @@ public class TransactionController {
       @RequestParam(required = false) String ibanTo,
       @RequestParam(required = false) Double amountMax,
       @RequestParam(required = false) Double amountMin,
+      @RequestParam(required = false) Long id,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime timestamp,
       @RequestParam(required = false) TransactionType type) {
-    List<TransactionResponseDTO> transactions = transactionService.getAllTransactions(getPagination(limit, offset), ibanFrom, ibanTo, amountMin, amountMax, dateFrom, timestamp, type);
+    List<TransactionResponseDTO> transactions = transactionService.getAllTransactions(getPagination(limit, offset), id, ibanFrom, ibanTo, amountMin, amountMax, dateFrom, timestamp, type);
     return ResponseEntity.ok().body(transactions);
   }
 
