@@ -181,7 +181,12 @@ components:
         message:
           type: string
           description: This message will be sent in case of any errors
-
+    AccountAbsoluteLimitRequest:
+      type: object
+      properties:
+        absolute_limit:
+          type: number
+          format: double
     UserResponse:
       type: object
       properties:
@@ -535,7 +540,55 @@ paths:
           $ref: '#/components/responses/AccountNotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-
+  /accounts/{user_id}/{account_id}/limit:
+    put:
+      tags:
+        - Accounts
+        - Employee
+      security:
+        - bearerAuth: []
+      description: >
+        Updates the account's absolute limit with the given user_id and account_id.
+      operationId: UpdateAccountAbsoluteLimit
+      parameters:
+        - name: account_id
+          in: path
+          description: Account ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountAbsoluteLimitRequest"
+            example:
+              absolute_limit: -20
+      responses:
+        "200":
+          description: Account has been updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+              example:
+                id: 1
+                iban: "NL74UNIB9388899795"
+                currency_type: "EURO"
+                account_type: "SAVING"
+                is_active: true
+                balance: 0
+                absolute_limit: 1000
+                first_name: "John"
+                last_name: "Doe"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/AccountNotFound"
   /register:
     post:
       tags:
