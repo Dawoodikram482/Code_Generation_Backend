@@ -1,7 +1,10 @@
 package com.example.Code_Generation_Backend.config;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.TransactionDTO;
-import com.example.Code_Generation_Backend.models.*;
+import com.example.Code_Generation_Backend.models.Account;
+import com.example.Code_Generation_Backend.models.AccountType;
+import com.example.Code_Generation_Backend.models.Role;
+import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.TransactionService;
 import com.example.Code_Generation_Backend.services.UserService;
