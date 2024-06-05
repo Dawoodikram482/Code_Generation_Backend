@@ -2,6 +2,7 @@ package com.example.Code_Generation_Backend.services;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.CustomerRegistrationDTO;
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.UserLimitsDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO.AccountDTO;
@@ -30,8 +31,7 @@ import java.time.ZoneId;
 
 
 @Service
-public class UserService
-{
+public class UserService {
 
   private final UserRepository userRepository;
   private final AccountService accountService;
@@ -42,28 +42,33 @@ public class UserService
   @Autowired
   private PasswordEncoder passwordEncoder;
 
-  public UserService(UserRepository userRepository, AccountService accountService)
-  {
+  public UserService(UserRepository userRepository, AccountService accountService) {
     this.userRepository = userRepository;
     this.accountService = accountService;
   }
 
 
-  public User SaveUser(User user)
-  {
+  public User SaveUser(User user) {
     return userRepository.save(user);
   }
 
+  public List<User> getAllUsers(int limit, int offset, Role passingRole) {
+    PageRequest pageRequest = PageRequest.of(offset / limit, limit);
+    Page<User> users;
+    if (passingRole != null) {
+      users = userRepository.findByRoles(passingRole, pageRequest);
+    } else {
+      users = userRepository.findAll(pageRequest);
+    }
+    return users.getContent();
+  }
 
-  public User getUserById(Long Id)
-  {
+  public User getUserById(Long Id) {
     return userRepository.findById(Id).orElseThrow(() -> new EntityNotFoundException("User with id: " + Id + " not found"));
   }
 
-  public boolean approveUser(Long userId, AccountCreatingDTO accountCreatingDTO)
-  {
-    try
-    {
+  public boolean approveUser(Long userId, AccountCreatingDTO accountCreatingDTO) {
+    try {
       User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User with id: " + userId + " not found"));
       user.setIsApproved(true);
       user.setDayLimit(accountCreatingDTO.dayLimit());
@@ -72,42 +77,39 @@ public class UserService
       accountService.createAccount(accountCreatingDTO);
       userRepository.save(user);
       return true;
-    } catch (Exception e)
-    {
+    } catch (Exception e) {
       return false;
     }
   }
 
   //this will be called as soon as client login and their Account overview displayed
   @Transactional
-  public UserDetailsDTO getUserDetails(User user)
-  {
+  public UserDetailsDTO getUserDetails(User user) {
     // Explicitly initialize accounts collection
     List<Account> accounts = user.getAccounts();
     accounts.size();
 
     List<AccountDTO> accountDTOs = user.getAccounts().stream().map(account ->
-            new AccountDTO(
-                    account.getIban(),
-                    account.getAccountBalance(),
-                    account.getAccountType()
-            )
+        new AccountDTO(
+            account.getIban(),
+            account.getAccountBalance(),
+            account.getAccountType()
+        )
     ).collect(Collectors.toList());
 
     return UserDetailsDTO.builder()
-            .firstName(user.getFirstName())
-            .lastName(user.getLastName())
-            .email(user.getEmail())
-            .phoneNumber(user.getPhoneNumber())
-            .dateOfBirth(user.getDateOfBirth())
-            .bsn(user.getBsn())
-            .accounts(accountDTOs)
-            .build();
+        .firstName(user.getFirstName())
+        .lastName(user.getLastName())
+        .email(user.getEmail())
+        .phoneNumber(user.getPhoneNumber())
+        .dateOfBirth(user.getDateOfBirth())
+        .bsn(user.getBsn())
+        .accounts(accountDTOs)
+        .build();
   }
 
 
-  public List<User> getUsersByApprovalStatus(int limit, int offset, boolean isApproved)
-  {
+  public List<User> getUsersByApprovalStatus(int limit, int offset, boolean isApproved) {
     PageRequest pageRequest = PageRequest.of(offset / limit, limit);
     Page<User> users;
     // Fetch users by approval status from the database
@@ -118,17 +120,6 @@ public class UserService
   public User getUserByEmail(String email) {
     return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
   }
-
-
- /* public List<User> getAllUsers(Pageable pageable, Role passingRole) {
-    Page<User> users;
-    if (passingRole != null) {
-      users = userRepository.findByRoles(passingRole, pageable);
-    } else {
-      users = userRepository.findAll(pageable);
-    }
-    return users.getContent();
-  }*/
 
   public User registerNewCustomer(CustomerRegistrationDTO dto) {
     // Check if a user with the same BSN or email already exists
@@ -155,6 +146,17 @@ public class UserService
   }
 
 
+  public void approveCustomer(Long userId) {
+    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID " + userId));
+    user.setApproved(true);
+    userRepository.save(user);
+  }
+
+  public User updateDailyLimit(Long userId, UserLimitsDTO userLimits) throws EntityNotFoundException {
+    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID " + userId));
+    user.setDayLimit(userLimits.dailyLimit());
+    return userRepository.save(user);
+  }
 }
 
 
