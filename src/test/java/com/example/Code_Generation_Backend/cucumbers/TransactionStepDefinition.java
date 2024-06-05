@@ -2,22 +2,17 @@ package com.example.Code_Generation_Backend.cucumbers;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.ATMTransactionDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.TransactionDTO;
-import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionResponseDTO;
 import com.example.Code_Generation_Backend.models.CurrencyType;
-import io.cucumber.java.en.When;
 import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
-import java.util.Optional;
 
 public class TransactionStepDefinition extends BaseStepDefinitions{
-  public static final String TRANSACTION_ENDPOINT = "/transactions";
+  public static final String TRANSACTION_ENDPOINT = "http://localhost:8080/transactions";
 
   @When("I call the application transaction endpoint")
   public void iCallTheApplicationTransactionEndpoint() {

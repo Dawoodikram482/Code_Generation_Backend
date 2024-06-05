@@ -13,16 +13,16 @@ public class BaseStepDefinitions {
   @Autowired
   protected TestRestTemplate restTemplate;
 
-  public static final String VALID_USERNAME = "admin";
-  public static final String VALID_PASSWORD = "Password1!";
+  public static final String VALID_USERNAME = "db@gmail.com";
+  public static final String VALID_PASSWORD = "password";
   public static final String INVALID_USERNAME = "brteabtea";
   public static final String INVALID_PASSWORD = "Password1gertabh!";
 
-  public static final String CLIENT_USERNAME = "client";
-  public static final String CLIENT_PASSWORD = "Password3!";
+  public static final String CLIENT_USERNAME = "dawood@gmail.com";
+  public static final String CLIENT_PASSWORD = "password";
 
-  public static final String EMPLOYEE_USERNAME = "employee";
-  public static final String EMPLOYEE_PASSWORD = "Password2!";
+  public static final String EMPLOYEE_USERNAME = "db@gmail.com";
+  public static final String EMPLOYEE_PASSWORD = "password";
 
   public static final int USER_ID = 3;
 }

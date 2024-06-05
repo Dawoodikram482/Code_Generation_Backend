@@ -5,9 +5,9 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpEntity;
 
 import java.util.List;
 

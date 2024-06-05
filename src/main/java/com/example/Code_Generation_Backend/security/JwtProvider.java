@@ -9,8 +9,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
-import java.security.PublicKey;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +24,7 @@ public class JwtProvider {
         this.myUserDetailsService = myUserDetailsService;
     }
 
-    public String createToken(String email, List<Role> roles) throws JwtException {
+    public String createToken(String email, List<Role> roles, Boolean isApproved) throws JwtException {
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("auth", roles.stream().map(Role::getAuthority).collect(Collectors.joining(", ")));
 

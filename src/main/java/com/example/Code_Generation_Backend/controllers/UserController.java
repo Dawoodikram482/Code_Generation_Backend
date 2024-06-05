@@ -3,13 +3,10 @@ package com.example.Code_Generation_Backend.controllers;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.CustomerRegistrationDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.UserLimitsDTO;
-import com.example.Code_Generation_Backend.DTOs.responseDTOs.AccountDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
-import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
-import com.example.Code_Generation_Backend.security.CustomUserDetails;
 import com.example.Code_Generation_Backend.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -28,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")

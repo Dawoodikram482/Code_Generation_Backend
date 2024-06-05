@@ -3,8 +3,6 @@ package com.example.Code_Generation_Backend.DTOs.requestDTOs;
 import com.example.Code_Generation_Backend.CustomValidators.ValidAccountType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.NonNull;
-import org.aspectj.bridge.IMessage;
 
 public record AccountCreatingDTO(
     @NotNull(message = "Day Limit cannot be left empty")

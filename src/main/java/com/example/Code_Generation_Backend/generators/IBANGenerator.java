@@ -2,10 +2,11 @@ package com.example.Code_Generation_Backend.generators;
 
 import com.example.Code_Generation_Backend.models.Account;
 import org.hibernate.HibernateException;
-import org.hibernate.id.IdentifierGenerator;
-import java.util.Random;
-import java.io.Serializable;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.id.IdentifierGenerator;
+
+import java.io.Serializable;
+import java.util.Random;
 
 
 public class IBANGenerator implements IdentifierGenerator {

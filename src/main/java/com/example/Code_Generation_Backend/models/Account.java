@@ -1,11 +1,13 @@
 package com.example.Code_Generation_Backend.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
-import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Data

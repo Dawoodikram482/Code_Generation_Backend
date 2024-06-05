@@ -3,31 +3,24 @@ package com.example.Code_Generation_Backend.services;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.CustomerRegistrationDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.UserLimitsDTO;
-import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO.AccountDTO;
 import com.example.Code_Generation_Backend.models.Account;
-import com.example.Code_Generation_Backend.models.AccountType;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
-import com.example.Code_Generation_Backend.repositories.UserRepository;
 import com.example.Code_Generation_Backend.repositories.AccountRepository;
+import com.example.Code_Generation_Backend.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 
 @Service
