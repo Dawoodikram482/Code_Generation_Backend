@@ -21,7 +21,7 @@ public class Transaction {
   private Account accountFrom;
   private LocalDate date;
   private LocalTime timestamp;
-  @OneToOne
+  @ManyToOne
   private User userPerforming;
   @Enumerated(EnumType.ORDINAL)
   private TransactionType transactionType;

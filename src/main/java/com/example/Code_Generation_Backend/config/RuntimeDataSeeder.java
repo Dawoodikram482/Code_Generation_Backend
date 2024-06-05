@@ -1,7 +1,10 @@
 package com.example.Code_Generation_Backend.config;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.TransactionDTO;
-import com.example.Code_Generation_Backend.models.*;
+import com.example.Code_Generation_Backend.models.Account;
+import com.example.Code_Generation_Backend.models.AccountType;
+import com.example.Code_Generation_Backend.models.Role;
+import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.TransactionService;
 import com.example.Code_Generation_Backend.services.UserService;
@@ -77,6 +80,29 @@ public class RuntimeDataSeeder implements ApplicationRunner {
         .transactionLimit(300)
         .build();
     userService.SaveUser(seedCustomer);
+
+    // Create accounts for Dawood
+    Account savingsAccount = Account.builder()
+            .iban("NL01DAWO0000000001")
+            .accountBalance(777.0)
+            .creationDate(LocalDate.now())
+            .absoluteLimit(100)
+            .isActive(true)
+            .accountType(AccountType.SAVINGS)
+            .customer(seedCustomer)
+            .build();
+    accountService.saveAccount(savingsAccount);
+
+    Account currentAccount = Account.builder()
+            .iban("NL01DAWO0000000002")
+            .accountBalance(7777.0)
+            .creationDate(LocalDate.now())
+            .absoluteLimit(100)
+            .isActive(true)
+            .accountType(AccountType.CURRENT)
+            .customer(seedCustomer)
+            .build();
+    accountService.saveAccount(currentAccount);
     return seedCustomer;
   }
 

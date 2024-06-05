@@ -11,63 +11,70 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity(name="users")
+@Entity(name = "users")
 public class User {
 
+
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(unique = true)
     private String bsn;
+
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
     private String phoneNumber;
+
     private Boolean isApproved;
+
     @Column(unique = true)
     private String email;
+
     @JsonIgnore
     private String password;
+
     private boolean isActive;
+
     @Builder.Default
     private double dayLimit = 500;
+
     @Builder.Default
     private double transactionLimit = 200;
+
     @Getter
     @ElementCollection(fetch = FetchType.EAGER)
     private List<Role> roles;
 
-
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Account> accounts;
 
-    public void setDayLimit(double dayLimit){
-        if(dayLimit > 0){
-            this.dayLimit = dayLimit;
-        }else{
-            this.dayLimit = 0;
-        }
+
+    // Ensure the dayLimit is always positive
+    public void setDayLimit(double dayLimit) {
+        this.dayLimit = Math.max(dayLimit, 0);
     }
 
-    public void setTransactionLimit(double transactionLimit){
-        if(transactionLimit > 0){
-            this.transactionLimit = transactionLimit;
-        }else{
-            this.transactionLimit = 0;
-        }
+    // Ensure the transactionLimit is always positive
+    public void setTransactionLimit(double transactionLimit) {
+        this.transactionLimit = Math.max(transactionLimit, 0);
     }
 
-    public String getFullName(){
+    // Get the full name by combining first and last name
+    public String getFullName() {
         return firstName + " " + lastName;
     }
 
-    public void addRole(Role role){
-        if(roles.contains(role)){
-            return;
+    // Add a role to the user if it doesn't already exist
+    public void addRole(Role role) {
+        if (!roles.contains(role)) {
+            roles.add(role);
         }
-        roles.add(role);
     }
 
+    // Get the primary role of the user
     public Role getRole() {
         if (roles != null && !roles.isEmpty()) {
             return roles.get(0);
@@ -75,14 +82,22 @@ public class User {
         return null; // or return a default role
     }
 
+    // Check if the user is approved
     public boolean isApproved() {
         return isApproved;
     }
 
+    // Set the approved status of the user
     public void setApproved(boolean approved) {
         isApproved = approved;
     }
 
-    public void setRole(Role newRole) {}
-    public void setFullName(String fullName) {}
+
+
+    // Placeholder methods (if needed)
+    public void setRole(Role newRole) {
+        // Implement if required
+    }
+
+
 }

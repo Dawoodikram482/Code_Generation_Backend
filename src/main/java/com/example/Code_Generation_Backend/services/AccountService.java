@@ -1,5 +1,6 @@
 package com.example.Code_Generation_Backend.services;
 
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.AbsoluteLimitRequestDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.generators.IBANGenerator;
 import com.example.Code_Generation_Backend.models.Account;
@@ -25,14 +26,18 @@ import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_SAVIN
 @Service
 public class AccountService {
 
+
   private final AccountRepository accountRepository;
   private final UserService userService;
   private final IBANGenerator ibanGenerator;
+
   public AccountService(AccountRepository accountRepository, @Lazy UserService userService) {
     this.accountRepository = accountRepository;
     this.userService = userService;
-      this.ibanGenerator =  new IBANGenerator(new Random());
+    this.ibanGenerator = new IBANGenerator(new Random());
   }
+
+
 
   // this method is used for internal working with app No new account should be made from user side
   // because it doesn't check account creation limit
@@ -94,17 +99,16 @@ public class AccountService {
       account.setActive(false);
       accountRepository.save(account);
       return true;
-    }catch (Exception e){
+    } catch (Exception e) {
       return false;
     }
   }
 
   public String getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
     Account account = accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
-            .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
+        .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
     return account.getIban();
   }
-
 
 
   private String generateUniqueIBAN() {
@@ -115,4 +119,11 @@ public class AccountService {
     return iban;
   }
 
+  public Account updateAbsoluteLimit(Account account, AbsoluteLimitRequestDTO absoluteLimitRequest) {
+    if (account.getAccountType().equals(AccountType.SAVINGS)) {
+      throw new IllegalArgumentException("Cannot update absolute limit for saving account");
+    }
+    account.setAbsoluteLimit(absoluteLimitRequest.absoluteLimit());
+    return accountRepository.save(account);
+  }
 }

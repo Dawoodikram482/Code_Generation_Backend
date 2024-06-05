@@ -1,16 +1,13 @@
 package com.example.Code_Generation_Backend.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
+
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -19,8 +16,6 @@ import org.hibernate.annotations.GenericGenerator;
 @AllArgsConstructor
 public class Account {
 
-  @Getter
-  @Setter
   @Id
   @GeneratedValue(generator = "IBANGenerator", strategy = GenerationType.IDENTITY)
   @GenericGenerator(name = "IBANGenerator", strategy = "com.example.Code_Generation_Backend.generators.IBANGenerator")
@@ -32,18 +27,36 @@ public class Account {
   private double absoluteLimit;
   @Builder.Default
   private boolean isActive = true;
-  @Enumerated(EnumType.ORDINAL)
+
+  @Enumerated(EnumType.STRING)
   private AccountType accountType;
+
   @ManyToOne
+  @JoinColumn(name = "user_id")
   private User customer;
 
-  //btw why is this in account models?
   public void setAccountBalance(double accountBalance) {
-    if (accountBalance > 0) {
+    if (accountBalance >= 0) {
       this.accountBalance = accountBalance;
     } else {
-      throw new IllegalArgumentException("Balance can not be negative");
+      throw new IllegalArgumentException("Balance cannot be negative");
     }
   }
 
+  public void setAbsoluteLimit(double absoluteLimit) {
+    if (absoluteLimit >= 0) {
+      this.absoluteLimit = absoluteLimit;
+    } else {
+      throw new IllegalArgumentException("Absolute limit cannot be negative");
+    }
+  }
+
+  // Method to set account type
+  public void setAccountType(AccountType accountType) {
+    this.accountType = accountType;
+  }
+
+  public void setCustomer(User customer) {
+    this.customer = customer;
+  }
 }

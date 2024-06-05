@@ -7,13 +7,11 @@ import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionResponse
 import com.example.Code_Generation_Backend.models.*;
 import com.example.Code_Generation_Backend.models.exceptions.DailyLimitException;
 import com.example.Code_Generation_Backend.models.exceptions.InsufficientBalanceException;
-import com.example.Code_Generation_Backend.models.exceptions.TransactionLimitException;
 import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import com.example.Code_Generation_Backend.repositories.TransactionRepository;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -21,7 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class TransactionService {
@@ -30,6 +27,7 @@ public class TransactionService {
   private final UserService userService;
   private final UserRepository userRepository;
   private final AccountService accountService;
+
   public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, UserService userService, UserRepository userRepository, AccountService accountService) {
     this.transactionRepository = transactionRepository;
     this.accountRepository = accountRepository;
@@ -38,8 +36,8 @@ public class TransactionService {
     this.accountService = accountService;
   }
 
-  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalDate dateAfter, TransactionType type) {
-    List<Transaction> transactions = transactionRepository.getTransactions(pageable, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, dateAfter, type).getContent();
+  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, Long id,String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
+    List<Transaction> transactions = transactionRepository.getTransactions(pageable, id, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type).getContent();
     if (transactions.isEmpty()) {
       throw new EntityNotFoundException("No transactions found for account with iban: " + ibanFrom);
     }
@@ -63,25 +61,9 @@ public class TransactionService {
     accountService.saveAccount(account);
   }
 
-  public void processATMTransaction(ATMTransactionDTO atmTransactionDTO) {
-//    Account account = accountRepository.findById(atmTransactionDTO.account()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + atmTransactionDTO.account() + " not found."));
-//
-//    if (atmTransactionDTO.action().equals("deposit")) {
-//      increaseBalance(atmTransactionDTO.amount(), atmTransactionDTO.account());
-//    } else if (atmTransactionDTO.action().equals("withdraw")) {
-//      // check if the account has enough balance  to withdraw
-//
-//      if (account.getAccountBalance() < atmTransactionDTO.amount()) {
-//        throw new InsufficientBalanceException("Insufficient balance");
-//      }
-//
-//      decreaseBalance(atmTransactionDTO.amount(), atmTransactionDTO.account());
-//    }
-  }
 
   public Transaction Deposit(ATMTransactionDTO atmTransaction, String userPerforming) throws AccountNotFoundException {
     Account receiver = accountService.getAccountByIBAN(atmTransaction.IBAN());
-    System.out.println("receiver: " + receiver.getCustomer().isApproved());
     if (receiver == null) {
       throw new AccountNotFoundException("Account with IBAN: " + atmTransaction.IBAN() + " not found");
     }
@@ -98,6 +80,26 @@ public class TransactionService {
         atmTransaction.currencyType()
     );
     updateAccountBalance(receiver, atmTransaction.amount(), true);
+    return transactionRepository.save(transaction);
+  }
+  public Transaction withdraw(ATMTransactionDTO atmTransactionDTO, String userPerforming) throws AccountNotFoundException {
+    Account withDrawer = accountService.getAccountByIBAN(atmTransactionDTO.IBAN());
+    if (withDrawer == null) {
+      throw new AccountNotFoundException("Account with IBAN: " + atmTransactionDTO.IBAN() + " not found");
+    }
+    User user = userService.getUserByEmail(userPerforming);
+    checkAccountPreconditionsForWithdrawOrDeposit(withDrawer, user);
+    Transaction transaction = new Transaction(
+        atmTransactionDTO.amount(),
+        null,
+        withDrawer,
+        LocalDate.now(),
+        LocalTime.now(),
+        user,
+        TransactionType.WITHDRAWAL,
+        atmTransactionDTO.currencyType()
+    );
+    updateAccountBalance(withDrawer, atmTransactionDTO.amount(), false);
     return transactionRepository.save(transaction);
   }
 
@@ -216,9 +218,10 @@ public class TransactionService {
     transaction.setAccountFrom(accountRepository.findById(transactionDTO.accountFrom()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + transactionDTO.accountFrom() + " not found.")));
     transaction.setAccountTo(accountRepository.findById(transactionDTO.accountTo()).orElseThrow(() -> new EntityNotFoundException("Account with iban: " + transactionDTO.accountTo() + " not found.")));
     transaction.setDate(LocalDate.now());
-    transaction.setTimestamp(LocalTime.now());
+    transaction.setTimestamp(LocalTime.now().withNano(0));
     transaction.setUserPerforming(initiator);
     transaction.setTransactionType(transactionType);
+    transaction.setCurrencyType(CurrencyType.EURO);
     return transaction;
   }
 
