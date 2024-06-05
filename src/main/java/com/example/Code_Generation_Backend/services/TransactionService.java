@@ -7,13 +7,11 @@ import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionResponse
 import com.example.Code_Generation_Backend.models.*;
 import com.example.Code_Generation_Backend.models.exceptions.DailyLimitException;
 import com.example.Code_Generation_Backend.models.exceptions.InsufficientBalanceException;
-import com.example.Code_Generation_Backend.models.exceptions.TransactionLimitException;
 import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import com.example.Code_Generation_Backend.repositories.TransactionRepository;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -21,7 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class TransactionService {
@@ -39,8 +36,8 @@ public class TransactionService {
     this.accountService = accountService;
   }
 
-  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
-    List<Transaction> transactions = transactionRepository.getTransactions(pageable, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type).getContent();
+  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, Long id,String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
+    List<Transaction> transactions = transactionRepository.getTransactions(pageable, id, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type).getContent();
     if (transactions.isEmpty()) {
       throw new EntityNotFoundException("No transactions found for account with iban: " + ibanFrom);
     }

@@ -1,7 +1,6 @@
 package com.example.Code_Generation_Backend.services;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.LoginRequestDTO;
-import com.example.Code_Generation_Backend.DTOs.responseDTOs.LoginResponseDTO;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.repositories.AuthRepository;
 import com.example.Code_Generation_Backend.security.JwtProvider;
@@ -22,19 +21,13 @@ public class AuthService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtProvider = jwtProvider;
     }
-
-    public User findByEmail(String email) {
-        return authRepository.findByEmail(email).orElse(null);
-    }
-
-    public LoginResponseDTO login(LoginRequestDTO loginRequest) throws AuthenticationException {
+    public String login(LoginRequestDTO loginRequest) throws AuthenticationException {
         User user = authRepository.findByEmail(loginRequest.email())
                 .orElseThrow(() -> new AuthenticationException("User not found"));
-        if (!bCryptPasswordEncoder.matches(loginRequest.password(), user.getPassword())) {
-            throw new AuthenticationException("Invalid username/password");
+        if (bCryptPasswordEncoder.matches(loginRequest.password(), user.getPassword())) {
+            return jwtProvider.createToken(user.getEmail(), user.getRoles(), user.isApproved());
+        }else{
+            throw new AuthenticationException("Incorrect password");
         }
-        String token = jwtProvider.createToken(user.getEmail(), user.getRoles());
-        LoginResponseDTO response = new LoginResponseDTO(user.getEmail(), token, user.getRole(), user.getFirstName(), user.getLastName());
-        return response;
     }
 }
