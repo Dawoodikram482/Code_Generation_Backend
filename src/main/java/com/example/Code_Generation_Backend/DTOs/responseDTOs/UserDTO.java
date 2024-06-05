@@ -1,6 +1,7 @@
 package com.example.Code_Generation_Backend.DTOs.responseDTOs;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
 public record UserDTO(
@@ -13,6 +14,7 @@ public record UserDTO(
     String email,
     boolean isActive,
     double dayLimit,
+    boolean isApproved,
     double transactionLimit
     ) {
 

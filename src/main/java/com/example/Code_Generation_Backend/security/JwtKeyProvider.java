@@ -4,12 +4,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 
 @Component
 @Getter
@@ -26,12 +26,10 @@ public class JwtKeyProvider {
     @PostConstruct
     protected void init() {
         try {
-            ClassPathResource resource = new ClassPathResource(keystore);
+            Resource resource = new ClassPathResource(keystore);
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(resource.getInputStream(), password.toCharArray());
             privateKey = keyStore.getKey(alias, password.toCharArray());
-            Certificate cert = keyStore.getCertificate(alias);
-            publicKey = cert.getPublicKey();
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
@@ -39,8 +37,5 @@ public class JwtKeyProvider {
 
     public Key getPrivateKey() {
         return privateKey;
-    }
-    public PublicKey getPublicKey() {
-        return publicKey;
     }
 }
