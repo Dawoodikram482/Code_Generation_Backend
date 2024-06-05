@@ -109,7 +109,6 @@ public class UserController {
     return PageRequest.of(offset / limit, limit);
   }
 
-
   @PostMapping("/register")
   public ResponseEntity<Map<String, Object>> registerCustomer(@Valid @RequestBody CustomerRegistrationDTO dto) {
     User user = userService.registerNewCustomer(dto);
