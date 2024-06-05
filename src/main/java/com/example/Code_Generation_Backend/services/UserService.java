@@ -67,8 +67,25 @@ public class UserService {
       user.setDayLimit(accountCreatingDTO.dayLimit());
       user.setTransactionLimit(accountCreatingDTO.transactionLimit());
       user.setRole(Role.ROLE_CUSTOMER);
-      accountService.createAccount(accountCreatingDTO);
-      userRepository.save(user);
+      // Create checking account
+      AccountCreatingDTO checkingAccountDTO = new AccountCreatingDTO(
+              accountCreatingDTO.dayLimit(),
+              accountCreatingDTO.absoluteLimit(),
+              accountCreatingDTO.transactionLimit(),
+              "CURRENT",
+              accountCreatingDTO.accountHolderId()
+      );
+      accountService.createAccount(checkingAccountDTO);
+
+      // Create savings account
+      AccountCreatingDTO savingsAccountDTO = new AccountCreatingDTO(
+              accountCreatingDTO.dayLimit(),
+              accountCreatingDTO.absoluteLimit(),
+              accountCreatingDTO.transactionLimit(),
+              "SAVINGS",
+              accountCreatingDTO.accountHolderId()
+      );
+      accountService.createAccount(savingsAccountDTO);
       return true;
     } catch (Exception e) {
       return false;

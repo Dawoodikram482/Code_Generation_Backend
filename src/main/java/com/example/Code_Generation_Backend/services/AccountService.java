@@ -104,9 +104,6 @@ public class AccountService {
     }
   }
 
-
-
-
   public String getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
     Account account = accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
         .orElseThrow(() -> new AccountNotFoundException("User does not exist"));

@@ -60,7 +60,6 @@ public class AccountController {
 
   ;
 
-
   @GetMapping("/search-iban")
   @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
   public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
@@ -105,13 +104,14 @@ public class AccountController {
     }
   }
 
-  private final Function<User, UserDTO> mapUserObjectToDTO = user ->
-      new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
-          user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
-          user.getDayLimit(), user.isApproved(), user.getTransactionLimit()
-      );
+    private final Function<User, UserDTO> mapUserObjectToDTO = user ->
+            new UserDTO(user.getId(), user.getBsn(), user.getFirstName(), user.getLastName(),
+                    user.getDateOfBirth(), user.getPhoneNumber(), user.getEmail(), user.isActive(),
+                    user.getDayLimit(), user.isApproved(), user.getTransactionLimit()
+            );
 
-    private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account ->
-            new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer().getFullName());
+    private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
+            new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()), account.getAccountBalance());
+
 }
 

@@ -62,8 +62,7 @@ public class UserController {
   @GetMapping("/pending-approvals")
   public ResponseEntity<Object> getPendingApprovals(
       @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
-      @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset) {
-
+      @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset) {  
     // Get users with isApproved set to false
     List<User> pendingApprovals = userService.getUsersByApprovalStatus(limit, offset, false);
     // Map users to DTOs
@@ -73,23 +72,23 @@ public class UserController {
     );
   }
 
-
-  @PostMapping("/approve/{userId}")
-  @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
-  public ResponseEntity<Object> approveUser(@PathVariable Long userId, @RequestBody AccountCreatingDTO creatingDTO) {
-    try {
-      userService.approveUser(userId, creatingDTO);
-      return ResponseEntity.status(HttpStatus.OK).body(new Object[0]);
-    } catch (Exception e) {
-      if (e instanceof BadCredentialsException) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-      }
-      if (e instanceof AuthenticationException) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-      }
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    @PostMapping("/approve/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
+    public ResponseEntity<Object> approveUser(@PathVariable Long id, @RequestBody AccountCreatingDTO creatingDTO) {
+        try {
+            userService.approveUser(id, creatingDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(new Object[0]);
+        } catch (Exception e) {
+            if(e instanceof BadCredentialsException){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            }
+            if(e instanceof AuthenticationException){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
-  }
+
 
   @GetMapping("/myAccountOverview")
   @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
