@@ -108,8 +108,6 @@ public class UserController {
             User user = userService.getUserByEmail(userDetails.getUsername());
             UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
             return ResponseEntity.ok(userDetailsDTO);
-
-
     }
 
     private final Function<User, UserDTO> mapUserObjectToDTO = user ->
