@@ -57,20 +57,6 @@ public class AccountController {
         );
     };
 
-    /*@GetMapping("/search-iban")
-    public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
-        try {
-            Account account = accountService.getIbanByName(firstName, lastName);
-            return account.getIban();
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(
-                    "User does not exist"); // this will be caught by RestControllerExceptionHandler
-        } catch (AccountNotFoundException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }*/
-
     @GetMapping("/search-iban")
     public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
         try {
@@ -105,9 +91,6 @@ public class AccountController {
                     user.getDayLimit(), user.isApproved(), user.getTransactionLimit()
             );
 
-//    private final Function<Account, TransactionAccountDTO> mapAccountObjectToDTO = account ->
-//            new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer().getFullName());
-
     private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
-            new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()));
+            new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()), account.getAccountBalance());
 }

@@ -67,11 +67,11 @@ public class UserController {
     }
 
 
-    @PostMapping("/approve/{userId}")
+    @PostMapping("/approve/{id}")
     @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
-    public ResponseEntity<Object> approveUser(@PathVariable Long userId, @RequestBody AccountCreatingDTO creatingDTO) {
+    public ResponseEntity<Object> approveUser(@PathVariable Long id, @RequestBody AccountCreatingDTO creatingDTO) {
         try {
-            userService.approveUser(userId, creatingDTO);
+            userService.approveUser(id, creatingDTO);
             return ResponseEntity.status(HttpStatus.OK).body(new Object[0]);
         } catch (Exception e) {
             if(e instanceof BadCredentialsException){
