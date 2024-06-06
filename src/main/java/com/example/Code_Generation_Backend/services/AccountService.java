@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -125,5 +126,13 @@ public class AccountService {
     }
     account.setAbsoluteLimit(absoluteLimitRequest.absoluteLimit());
     return accountRepository.save(account);
+  }
+
+  public List<Account> getAccountByStatus(Pageable pageable,boolean isActive) throws AccountNotFoundException {
+    Page <Account> accounts = accountRepository.findAccountByIsActive(pageable,isActive);
+    if (accounts.isEmpty()) {
+      throw new AccountNotFoundException("No account found with status: " + isActive);
+    }
+    return accounts.getContent();
   }
 }
