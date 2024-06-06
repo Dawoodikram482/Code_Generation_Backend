@@ -24,14 +24,6 @@ public class authenticationStepDefinition extends BaseStepDefinitions{
   public void iHaveAValidLoginCredentials() {
     loginRequest = new LoginRequestDTO("db@gmail.com", "password");
   }
-//  @Given("I have a valid user login credentials")
-//  public void iHaveAValidUserLoginCredentials() {
-//    loginRequest = new LoginRequestDTO(CLIENT_USERNAME, CLIENT_PASSWORD);
-//  }
-//  @Given("I have a valid employee login credentials")
-//  public void iHaveAValidEmployeeLoginCredentials() {
-//    loginRequest = new LoginRequestDTO(EMPLOYEE_USERNAME, EMPLOYEE_PASSWORD);
-//  }
   @When("I call the application login endpoint")
   public void iCallTheApplicationLoginEndpoint() throws JsonProcessingException {
     headers.add("Content-Type", "application/json");
