@@ -29,8 +29,8 @@ public class CustomerRegistrationDTO {
     @NotNull
     private LocalDate birthDate;
 
-    @NotBlank
-    private String accountType;
+ /*   @NotBlank
+    private String accountType;*/
 
     @NotBlank
     private String password;
@@ -63,9 +63,9 @@ public class CustomerRegistrationDTO {
     }
 
 
-    public void setAccountType(String accountType) {
+/*    public void setAccountType(String accountType) {
         this.accountType = accountType;
-    }
+    }*/
 
 
 }
