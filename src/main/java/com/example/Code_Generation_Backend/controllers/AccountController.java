@@ -117,7 +117,7 @@ public class AccountController {
             );
 
     private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
-            new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()), account.getAccountBalance());
+            new AccountDTO(account.getIban(), account.getAccountType(), account.isActive(), mapUserObjectToDTO.apply(account.getCustomer()), account.getAccountBalance());
 
     @GetMapping("/status")
     @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
