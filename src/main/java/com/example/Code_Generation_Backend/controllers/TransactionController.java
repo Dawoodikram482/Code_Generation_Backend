@@ -44,6 +44,7 @@ public class TransactionController {
   }
 
   @GetMapping
+  @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
   public ResponseEntity<Object> getAllTransactions(
       @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false)
       int limit,
@@ -164,7 +165,7 @@ public class TransactionController {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
   }
-  private Pageable getPagination(int limit, int offset) {
+  public Pageable getPagination(int limit, int offset) {
     return PageRequest.of(offset / limit, limit);
   }
 

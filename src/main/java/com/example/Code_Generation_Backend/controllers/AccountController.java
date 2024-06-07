@@ -10,6 +10,8 @@ import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
 import java.util.function.Function;
+
+import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_LIMIT_STRING;
+import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_OFFSET_STRING;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -112,7 +117,24 @@ public class AccountController {
             );
 
     private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
-            new AccountDTO(account.getIban(), account.getAccountType(), mapUserObjectToDTO.apply(account.getCustomer()), account.getAccountBalance());
+            new AccountDTO(account.getIban(), account.getAccountType(), account.isActive(), mapUserObjectToDTO.apply(account.getCustomer()), account.getAccountBalance());
 
+    @GetMapping("/status")
+    @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
+    public ResponseEntity<Object> getAccountByStatus(@RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false)
+                                                         int limit,
+                                                     @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false)
+                                                         int offset) {
+        try {
+            List<Account> accounts = accountService.getAccountByStatus(getPagination(limit,offset),true);
+            return ResponseEntity.ok(accounts.parallelStream().map(mapAccountObjectToDTO).toList());
+        } catch (AccountNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    Pageable getPagination(int limit, int offset) {
+        return PageRequest.of(offset / limit, limit);
+    }
 }
 
