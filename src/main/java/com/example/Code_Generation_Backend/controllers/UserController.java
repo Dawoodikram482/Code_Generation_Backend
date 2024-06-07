@@ -91,8 +91,7 @@ public class UserController {
 
 
   @GetMapping("/myAccountOverview")
-  @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
-
+  @PreAuthorize("hasRole('ROLE_EMPLOYEE') or hasRole('ROLE_CUSTOMER')")
   public ResponseEntity<UserDetailsDTO> getMyDetails(@AuthenticationPrincipal UserDetails userDetails) {
     User user = userService.getUserByEmail(userDetails.getUsername());
     UserDetailsDTO userDetailsDTO = userService.getUserDetails(user);
