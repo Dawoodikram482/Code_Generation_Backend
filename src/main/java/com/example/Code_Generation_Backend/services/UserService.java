@@ -164,7 +164,7 @@ public class UserService {
 
   public User updateDailyLimit(Long userId, UserLimitsDTO userLimits) throws EntityNotFoundException {
     User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID " + userId));
-    user.setDayLimit(userLimits.dailyLimit());
+    user.setDayLimit(userLimits.dayLimit());
     return userRepository.save(user);
   }
 }
