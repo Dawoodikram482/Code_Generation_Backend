@@ -3,6 +3,7 @@ package com.example.Code_Generation_Backend.controllers;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.ATMTransactionDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.TransactionDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionResponseDTO;
+import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.TransactionType;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_LIMIT_STRING;
 import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_OFFSET_STRING;
@@ -36,6 +39,8 @@ public class TransactionController {
   private final TransactionService transactionService;
   private final AccountService accountService;
   private final UserService userService;
+  private final Predicate<GrantedAuthority> isEmployee =
+      a -> a.getAuthority().equals(Role.ROLE_EMPLOYEE.name());
 
   public TransactionController(TransactionService transactionService, AccountService accountService, UserService userService) {
     this.transactionService = transactionService;
@@ -44,7 +49,7 @@ public class TransactionController {
   }
 
   @GetMapping
-  @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
+  @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE', 'ROLE_CUSTOMER')")
   public ResponseEntity<Object> getAllTransactions(
       @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false)
       int limit,
@@ -57,7 +62,13 @@ public class TransactionController {
       @RequestParam(required = false) Long id,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime timestamp,
-      @RequestParam(required = false) TransactionType type) {
+      @RequestParam(required = false) TransactionType type,
+      @AuthenticationPrincipal UserDetails jwtUser) {
+    if (jwtUser.getAuthorities().stream().noneMatch((isEmployee)) &&
+        (!transactionService.accountBelongsToUser(ibanTo, jwtUser.getUsername()))
+        && (!transactionService.accountBelongsToUser(ibanFrom, jwtUser.getUsername()))) {
+      throw new BadCredentialsException("You are not authorized to perform this action");
+    }
     List<TransactionResponseDTO> transactions = transactionService.getAllTransactions(getPagination(limit, offset), id, ibanFrom, ibanTo, amountMin, amountMax, dateFrom, timestamp, type);
     return ResponseEntity.ok().body(transactions);
   }
@@ -69,16 +80,19 @@ public class TransactionController {
                                                          @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false)
                                                          int offset,
                                                          @PathVariable
-                                                         String iban) {
-//    List<TransactionResponseDTO> transactions = transactionService.getTransactions(getPagination(limit, offset), iban);
-//    return ResponseEntity.ok().body(transactions);
-    try{
+                                                         String iban,
+                                                         @AuthenticationPrincipal UserDetails jwtUser) {
+    if (jwtUser.getAuthorities().stream().noneMatch((isEmployee)) &&
+        (!transactionService.accountBelongsToUser(iban, jwtUser.getUsername()))) {
+      throw new BadCredentialsException("You are not authorized to perform this action");
+    }
+    try {
       return ResponseEntity.status(HttpStatus.OK).body(transactionService.getTransactions(getPagination(limit, offset), iban));
-    }catch (Exception e){
-      if(e instanceof BadCredentialsException){
+    } catch (Exception e) {
+      if (e instanceof BadCredentialsException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
-      if(e instanceof AuthenticationException){
+      if (e instanceof AuthenticationException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -95,11 +109,11 @@ public class TransactionController {
         TransactionResponseDTO newTransaction = transactionService.addTransaction(transactionDTO, userPerforming);
         return ResponseEntity.ok().body(newTransaction);
       }
-    }catch (Exception e){
-      if(e instanceof BadCredentialsException){
+    } catch (Exception e) {
+      if (e instanceof BadCredentialsException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
-      if(e instanceof AuthenticationException){
+      if (e instanceof AuthenticationException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -110,33 +124,35 @@ public class TransactionController {
   @PostMapping("/atm/deposit")
   @PreAuthorize("hasAnyRole('ROLE_CUSTOMER', 'ROLE_EMPLOYEE')")
   public ResponseEntity<Object> deposit(@RequestBody ATMTransactionDTO atmTransactionDTO, @AuthenticationPrincipal UserDetails jwtUser) {
-    try{
+    try {
       return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.Deposit(atmTransactionDTO, jwtUser.getUsername()));
-  } catch (Exception e) {
+    } catch (Exception e) {
       if (e instanceof BadCredentialsException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
-      if(e instanceof AuthenticationException){
+      if (e instanceof AuthenticationException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
   }
+
   @PostMapping("/atm/withdraw")
   @PreAuthorize("hasAnyRole('ROLE_CUSTOMER', 'ROLE_EMPLOYEE')")
   public ResponseEntity<Object> withdraw(@RequestBody ATMTransactionDTO atmTransactionDTO, @AuthenticationPrincipal UserDetails jwtUser) {
-    try{
+    try {
       return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.withdraw(atmTransactionDTO, jwtUser.getUsername()));
     } catch (Exception e) {
       if (e instanceof BadCredentialsException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
-      if(e instanceof AuthenticationException){
+      if (e instanceof AuthenticationException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
   }
+
   @GetMapping("/atm/withdraw")
   public ResponseEntity<Object> getWithdrawals() {
     try {
@@ -145,26 +161,28 @@ public class TransactionController {
       if (e instanceof BadCredentialsException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
-      if(e instanceof AuthenticationException){
+      if (e instanceof AuthenticationException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
   }
+
   @GetMapping("/atm/deposit")
-  public ResponseEntity<Object>getDeposits(){
-    try{
+  public ResponseEntity<Object> getDeposits() {
+    try {
       return ResponseEntity.status(HttpStatus.OK).body(transactionService.getDeposits());
     } catch (Exception e) {
       if (e instanceof BadCredentialsException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
-      if(e instanceof AuthenticationException){
+      if (e instanceof AuthenticationException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
       }
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
   }
+
   public Pageable getPagination(int limit, int offset) {
     return PageRequest.of(offset / limit, limit);
   }

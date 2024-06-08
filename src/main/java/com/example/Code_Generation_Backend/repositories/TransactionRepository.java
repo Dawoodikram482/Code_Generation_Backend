@@ -32,8 +32,6 @@ public interface TransactionRepository extends CrudRepository<Transaction, Long>
   void increaseBalanceByAmount(double amount, String accountTo);
   @Query("SELECT sum (t.amount) FROM Transaction t WHERE t.accountFrom.customer.email = :userEmail AND t.date = current_date AND t.accountFrom.accountType = com.example.Code_Generation_Backend.models.AccountType.CURRENT AND t.accountTo.accountType = com.example.Code_Generation_Backend.models.AccountType.CURRENT")
   Double getSumOfMoneyTransferredToday(@Param("userEmail") String userEmail);
-  @Query("SELECT t FROM Transaction t")
-  Page<Transaction>getTransactions(Pageable pageable, Long id, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type);
   @Query("SELECT t FROM Transaction t WHERE t.transactionType = :type")
   List<Transaction> getTransactionsByType(TransactionType type);
 }
