@@ -62,6 +62,10 @@ public class CustomerRegistrationDTO {
         this.birthDate = birthDate;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 
 /*    public void setAccountType(String accountType) {
         this.accountType = accountType;

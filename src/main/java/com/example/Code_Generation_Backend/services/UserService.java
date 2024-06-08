@@ -156,11 +156,6 @@ public class UserService {
   }
 
 
-  public void approveCustomer(Long userId) {
-    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID " + userId));
-    user.setApproved(true);
-    userRepository.save(user);
-  }
 
   public User updateDailyLimit(Long userId, UserLimitsDTO userLimits) throws EntityNotFoundException {
     User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID " + userId));
