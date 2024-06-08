@@ -214,7 +214,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
             .isApproved(true)
         .dayLimit(300)
         .transactionLimit(300)
-        .roles(List.of(Role.ROLE_EMPLOYEE))
+        .roles(List.of(Role.ROLE_EMPLOYEE, Role.ROLE_CUSTOMER))
         .build();
     userService.SaveUser(Solaiman);
 
