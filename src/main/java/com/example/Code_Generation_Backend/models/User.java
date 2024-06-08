@@ -67,12 +67,18 @@ public class User {
         return firstName + " " + lastName;
     }
 
+    public String setUsername() {
+        return email;
+    }
+
     // Add a role to the user if it doesn't already exist
     public void addRole(Role role) {
         if (!roles.contains(role)) {
             roles.add(role);
         }
     }
+
+
 
     // Get the primary role of the user
     public Role getRole() {

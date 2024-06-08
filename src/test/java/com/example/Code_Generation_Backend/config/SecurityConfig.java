@@ -22,6 +22,7 @@ public class SecurityConfig {
                     .requestMatchers("/users/**").permitAll()
                     .requestMatchers("/accounts/**").permitAll()
                     .requestMatchers("/atm/**").permitAll()
+                    .requestMatchers("/accounts/search-iban").permitAll()
                     .anyRequest().authenticated());
 
     return http.build();

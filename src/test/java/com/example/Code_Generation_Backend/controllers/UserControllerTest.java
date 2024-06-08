@@ -110,7 +110,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testuser", roles = {"USER"})
+    @WithMockUser(username = "testuser", roles = {"CUSTOMER"})
     void testRegisterUser() throws Exception {
         when(userService.registerNewCustomer(registrationDTO)).thenReturn(registeredUser);
 
