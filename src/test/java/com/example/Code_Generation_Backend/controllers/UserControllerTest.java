@@ -68,7 +68,7 @@ public class UserControllerTest {
         registrationDTO = new CustomerRegistrationDTO();
         registrationDTO.setFirstName("Aura");
         registrationDTO.setLastName("Example");
-        registrationDTO.setEmail("jancokjancok@example.com");
+        registrationDTO.setEmail("jancokjancok@gmail.com");
         registrationDTO.setPhoneNumber("5435332");
         registrationDTO.setBsn("5895498");
         registrationDTO.setBirthDate(LocalDate.of(2000, 1, 1));
@@ -77,7 +77,7 @@ public class UserControllerTest {
         registeredUser = new User();
         registeredUser.setFirstName("Aura");
         registeredUser.setLastName("Example");
-        registeredUser.setEmail("aura@example.com");
+        registeredUser.setEmail("aura@gmail.com");
         registeredUser.setPhoneNumber("5435332");
         registeredUser.setBsn("221001");
         registeredUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
@@ -86,8 +86,8 @@ public class UserControllerTest {
         // New setup for getMyDetails test
         testUser = new User();
         testUser.setFirstName("Aura");
-        testUser.setLastName("Example");
-        testUser.setEmail("aura@example.com");
+        testUser.setLastName("Alfina");
+        testUser.setEmail("alfinaauraoverview@gmail.com");
         testUser.setPhoneNumber("5435332");
         testUser.setBsn("221001");
         testUser.setDateOfBirth(LocalDate.of(2000, 1, 1));
@@ -95,8 +95,8 @@ public class UserControllerTest {
 
         userDetailsDTO = new UserDetailsDTO();
         userDetailsDTO.setFirstName("Aura");
-        userDetailsDTO.setLastName("Example");
-        userDetailsDTO.setEmail("aura@example.com");
+        userDetailsDTO.setLastName("Alfina");
+        userDetailsDTO.setEmail("alfinaauraoverview@gmail.com");
         userDetailsDTO.setPhoneNumber("5435332");
         userDetailsDTO.setDateOfBirth(LocalDate.of(2000, 1, 1));
         userDetailsDTO.setBsn("221001");
@@ -151,7 +151,7 @@ public class UserControllerTest {
     }*/
 
     @Test
-    @WithMockUser(username = "aura@example.com", roles = {"CUSTOMER"})
+    @WithMockUser(username = "alfinaauraoverview@gmail.com", roles = {"CUSTOMER"})
     void testGetMyDetails() throws Exception {
         // Mocking the UserService to return the testUser and UserDetailsDTO when appropriate methods are called
         when(userService.getUserByEmail(testUser.getEmail())).thenReturn(testUser);
@@ -170,8 +170,8 @@ public class UserControllerTest {
                         .with(user(userDetails)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("Aura"))
-                .andExpect(jsonPath("$.lastName").value("Example"))
-                .andExpect(jsonPath("$.email").value("aura@example.com"))
+                .andExpect(jsonPath("$.lastName").value("Alfina"))
+                .andExpect(jsonPath("$.email").value("alfinaauraoverview@gmail.com"))
                 .andExpect(jsonPath("$.phoneNumber").value("5435332"))
                 .andExpect(jsonPath("$.dateOfBirth").value("2000-01-01"))
                 .andExpect(jsonPath("$.bsn").value("221001"))
