@@ -8,6 +8,7 @@ import com.example.Code_Generation_Backend.models.*;
 import com.example.Code_Generation_Backend.models.exceptions.DailyLimitException;
 import com.example.Code_Generation_Backend.models.exceptions.InsufficientBalanceException;
 import com.example.Code_Generation_Backend.repositories.AccountRepository;
+import com.example.Code_Generation_Backend.repositories.Specifications.TransactionSpecifications;
 import com.example.Code_Generation_Backend.repositories.TransactionRepository;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TransactionService {
@@ -37,7 +39,8 @@ public class TransactionService {
   }
 
   public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, Long id,String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
-    List<Transaction> transactions = transactionRepository.getTransactions(pageable, id, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type).getContent();
+    var specification = TransactionSpecifications.getTransactionsByFilters(id, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type);
+    List<Transaction> transactions = transactionRepository.findAll(specification, pageable).getContent();
     if (transactions.isEmpty()) {
       throw new EntityNotFoundException("No transactions found for account with iban: " + ibanFrom);
     }
@@ -239,4 +242,16 @@ public class TransactionService {
     Double amount = transactionRepository.getSumOfMoneyTransferredToday(email);
     return amount == null ? 0.00 : amount;
   }
+  public boolean accountBelongsToUser(String iban, String userName) {
+    Account account = null;
+
+    if(iban != null) {
+      account = accountRepository.findById(iban)
+          .orElseThrow(() -> new EntityNotFoundException("Account " + iban + " not found"));
+      return account.getCustomer().getEmail().equals(userName);
+    }
+
+    return false;
+  }
+
 }
