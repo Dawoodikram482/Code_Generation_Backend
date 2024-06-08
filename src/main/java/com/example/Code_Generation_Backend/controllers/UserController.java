@@ -10,6 +10,7 @@ import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,6 @@ public class UserController {
   private final String DEFAULT_OFFSET_STRING = "0";
   private final String DEFAULT_LIMIT_STRING = "50";
   private final UserService userService;
-
   public UserController(UserService userService) {
     this.userService = userService;
   }
@@ -117,6 +117,17 @@ public class UserController {
     response.put("data", user);
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<Map<String, String>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+    Map<String, String> response = new HashMap<>();
+    response.put("status", "error");
+    response.put("message", e.getMessage());
+    return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+  }
+
+
+
 
   @PutMapping("/{id}/limits")
   @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
