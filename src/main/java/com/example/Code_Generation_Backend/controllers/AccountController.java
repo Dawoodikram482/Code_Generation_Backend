@@ -2,7 +2,6 @@ package com.example.Code_Generation_Backend.controllers;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AbsoluteLimitRequestDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.AccountDTO;
-import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionAccountDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.models.AccountType;
@@ -22,9 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
 import java.util.function.Function;
-
-import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_LIMIT_STRING;
-import static com.example.Code_Generation_Backend.models.Constants.DEFAULT_OFFSET_STRING;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -117,7 +113,7 @@ public class AccountController {
             );
 
     private final Function<Account, AccountDTO> mapAccountObjectToDTO = account ->
-            new AccountDTO(account.getIban(), account.getAccountType(), account.isActive(), mapUserObjectToDTO.apply(account.getCustomer()), account.getAccountBalance());
+            new AccountDTO(account.getIban(), account.getAccountType(), account.isActive(), mapUserObjectToDTO.apply(account.getCustomer()), account.getAccountBalance(), account.getAbsoluteLimit());
 
     @GetMapping("/status")
     @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
