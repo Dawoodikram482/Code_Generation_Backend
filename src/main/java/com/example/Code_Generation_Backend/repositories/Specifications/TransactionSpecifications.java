@@ -8,11 +8,12 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public class TransactionSpecifications {
 
   public static Specification<Transaction> getTransactionsByFilters(
-      Long id, String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
+          Long id, List<String> ibansFrom, List<String> ibansTo, Double amountMin, Double amountMax, LocalDate dateFrom, LocalDate dateTo, TransactionType type) {
 
     return (root, query, criteriaBuilder) -> {
       Predicate predicate = criteriaBuilder.conjunction();
@@ -20,23 +21,32 @@ public class TransactionSpecifications {
       if (id != null) {
         predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("id"), id));
       }
-      if (ibanFrom != null) {
-        predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("accountFrom").get("iban"), ibanFrom));
+
+      // Handling ibansFrom and ibansTo with an OR condition
+      if ((ibansFrom != null && !ibansFrom.isEmpty()) || (ibansTo != null && !ibansTo.isEmpty())) {
+        Predicate ibanPredicate = criteriaBuilder.disjunction();
+
+        if (ibansFrom != null && !ibansFrom.isEmpty()) {
+          ibanPredicate = criteriaBuilder.or(ibanPredicate, root.get("accountFrom").get("iban").in(ibansFrom));
+        }
+        if (ibansTo != null && !ibansTo.isEmpty()) {
+          ibanPredicate = criteriaBuilder.or(ibanPredicate, root.get("accountTo").get("iban").in(ibansTo));
+        }
+
+        predicate = criteriaBuilder.and(predicate, ibanPredicate);
       }
-      if (ibanTo != null) {
-        predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("accountTo").get("iban"), ibanTo));
-      }
+
       if (amountMin != null) {
         predicate = criteriaBuilder.and(predicate, criteriaBuilder.greaterThanOrEqualTo(root.get("amount"), amountMin));
       }
       if (amountMax != null) {
         predicate = criteriaBuilder.and(predicate, criteriaBuilder.lessThanOrEqualTo(root.get("amount"), amountMax));
       }
-      if (dateBefore != null) {
-        predicate = criteriaBuilder.and(predicate, criteriaBuilder.lessThanOrEqualTo(root.get("date"), dateBefore));
+      if (dateFrom != null) {
+        predicate = criteriaBuilder.and(predicate, criteriaBuilder.greaterThanOrEqualTo(root.get("date"), dateFrom));
       }
-      if (timestamp != null) {
-        predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("timestamp"), timestamp));
+      if (dateTo != null) {
+        predicate = criteriaBuilder.and(predicate, criteriaBuilder.lessThanOrEqualTo(root.get("date"), dateTo));
       }
       if (type != null) {
         predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("transactionType"), type));

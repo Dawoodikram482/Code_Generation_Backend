@@ -24,7 +24,7 @@ public interface AccountRepository extends JpaRepository<Account, String>, JpaSp
   Page<Account> findAll(@NonNull Pageable pageable);
   boolean existsAccountByCustomerEmailEqualsIgnoreCaseAndIbanEquals(String iban, String email);
   Optional<Account> findByIban(String iban);
-  Optional<Account> findByCustomerFirstNameAndCustomerLastName(String firstName, String lastName);
+  Page<Account> findByCustomerFirstNameAndCustomerLastName(@NonNull Pageable pageable, String firstName, String lastName);
   boolean existsByIban(String iban);
   Page<Account> findAccountByIsActive(Pageable pageable,@NonNull boolean isActive);
 }
