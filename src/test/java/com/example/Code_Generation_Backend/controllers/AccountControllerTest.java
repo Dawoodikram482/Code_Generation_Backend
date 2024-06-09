@@ -5,16 +5,10 @@ import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionAccountD
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionResponseDTO;
 import com.example.Code_Generation_Backend.config.SecurityConfig;
 import com.example.Code_Generation_Backend.jwtFilter.JwtTokenFilter;
-import com.example.Code_Generation_Backend.models.Account;
-import com.example.Code_Generation_Backend.models.AccountType;
-import com.example.Code_Generation_Backend.models.Role;
-import com.example.Code_Generation_Backend.models.User;
-import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import com.example.Code_Generation_Backend.models.*;
 import com.example.Code_Generation_Backend.security.JwtProvider;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.UserService;
-import org.h2.mvstore.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +27,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
@@ -73,8 +66,6 @@ public class AccountControllerTest {
     private User user2;
     private User user3;
     private Account testAccount4;
-
-    private AccountRepository accountRepository;
 
     @BeforeEach
     void init() {
@@ -119,7 +110,7 @@ public class AccountControllerTest {
                 .lastName("Ikram")
                 .dateOfBirth(LocalDate.of(2003, 7, 16))
                 .phoneNumber("0611111121")
-                .email("aura@gmail.com")
+                .email("dawood@gmail.com")
                 .password("password")
                 .isActive(true)
                 .isApproved(true)
@@ -128,31 +119,6 @@ public class AccountControllerTest {
                 .transactionLimit(300)
                 .build();
 
-        testAccount = new Account();
-        testAccount.setIban("NL91INH0417164300");
-        testAccount.setCustomer(testUser);
-    }
-
-   @Test
-    @WithMockUser(username = "testuser", roles = {"CUSTOMER"})
-    void testSearchIban_Success() throws Exception {
-
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Account> accountList = List.of(testAccount);
-        Page<Account> accountPage = new PageImpl<>(accountList, pageable, accountList.size());
-
-        when(accountRepository.findByCustomerFirstNameAndCustomerLastName(pageable, "John", "Doe")).thenReturn(accountPage);
-
-
-        mockMvc.perform(get("/accounts/search-iban")
-                        .param("firstName", "John")
-                        .param("lastName", "Doe")
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].iban").value("NL91ABNA0417164300"))
-                .andExpect(jsonPath("$.content[0].accountType").value(AccountType.CURRENT.toString()))
-                .andExpect(jsonPath("$.content[0].customerName").value("John Doe"));
         testAccount4 = new Account("NL01DAWO0000000001", 777.0, LocalDate.now(), 100.0, true, AccountType.SAVINGS, user3);
     }
 
@@ -196,13 +162,13 @@ public class AccountControllerTest {
         when(accountService.closeAccount("NL01UNIB123456789")).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/accounts/closeAccount/NL01UNIB123456789")
-                .with(csrf()))
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         when(accountService.closeAccount("NL01UNIB123456789")).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/accounts/closeAccount/NL01UNIB123456789")
-                 .with(csrf()))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Failed to close the account"));
     }
