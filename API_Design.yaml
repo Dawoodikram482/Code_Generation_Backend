@@ -1,14 +1,1015 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
+  version: 1.0.0
   title: Banking API
   description: Banking API
-  version: 1.0.0
 tags:
   - name: Users
     description: Endpoints for users.
   - name: Authentication
     description: Endpoints for authentication.
-  - name: Accounts
-    description: Endpoints for bank accounts.
   - name: Transactions
     description: Endpoints for transactions.
+  - name: Accounts
+    description: Endpoints for Accounts
+
+security:
+  - bearerAuth: []
+
+#Components
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  #Examples
+  examples:
+    AccountExample1:
+      value:
+        accountNumber: NL90 UNIB 1199 8822 73
+        accountBalance: 1500.00
+        creationDate: 25/04/2020
+        absoluteLimit: 1500
+        isActive: true
+        accountType: Current
+        accountHolder:
+          userId: 1
+          dayLimit: 500
+          transactionLimit: 500
+          firstName: TestUser1
+    SearchedAccountEg1:
+      value:
+        accountHolder: Test User 1
+        accountNumber: NL89 UNIB 0000 1111 22
+    User112233445:
+      value:
+        userId: 1
+        firstName: Parranasian
+        lastName: Parrapeero
+        email: parranasianparrapeero@gmail.com
+        birthDate: 2003-7-16
+        bsn: 112233445
+        phoneNumber: "0698765432"
+        dayLimit: 500.00
+        transactionLimit: 500.00
+
+  #parameters
+  parameters:
+    accountNumberPathParam:
+      name: IBAN
+      in: path
+      description: The account number of bank account
+      required: true
+      schema:
+        format: 'NL[0-9]{2}UNIB[0-9]{9}'
+        type: string
+      example: 'NL01UNIB112233445'
+    QueryLimitParameter:
+      name: limit
+      in: query
+      description: Max number of items to return (50)
+      required: false
+      schema:
+        type: integer
+        maximum: 50
+        default: 50
+    QueryOffsetParameter:
+      name: offset
+      in: query
+      description: Number of items to skip before returning the requested items.
+      required: false
+      schema:
+        type: integer
+        default: 0
+
+    userId:
+      name: userId
+      in: path
+      description: The unique Id of User
+      required: true
+      schema:
+        type: integer
+
+
+  #responses
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: Login credentials required
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: You don't have (right) permission to access this resource
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: Something went wrong internally. Try again later.
+    AccountNotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: Requested account was not found
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: The request was not valid
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: You already have an account
+    NoContent:
+      description: No Content
+  #schemas
+  schemas:
+    Account:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+        balance:
+          type: number
+        creationDate:
+          type: string
+        isActive:
+          type: boolean
+        accountType:
+          type: string
+          enum: [savings, current]
+          description: The type of account, can be either savings or current
+        accountHolder:
+          type: object
+          properties:
+            userId:
+              type: integer
+            firstName:
+              type: string
+            lastName:
+              type: string
+            dayLimit:
+              type: number
+            transactionLimit:
+              type: number
+
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: This message will be sent in case of any errors
+    AccountAbsoluteLimitRequest:
+      type: object
+      properties:
+        absolute_limit:
+          type: number
+          format: double
+    UserLimitsRequest:
+      type: object
+      properties:
+        dailyLimit:
+          type: number
+          format: double
+          maximum: 1000000
+          minimum: 0
+    UserResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          description: Unique identifier for the user/person
+          example: 1
+        firstName:
+          type: string
+          description: First name of the user
+          example: Parranasian
+        lastName:
+          type: string
+          description: Last name of the user
+          example: Parrapeero
+        email:
+          type: string
+          description: Email of the user
+          example: parranasianparrapeero@gmail.com
+        birthDate:
+          type: string
+          format: date
+          description: Birth date of the user
+          example: 2003-7-16
+        phoneNumber:
+          type: string
+          description: Phone number of the user
+          example: "0698765432"
+        dayLimit:
+          type: number
+          description: Day limit of all transactions for the user
+          example: "500.00"
+        transactionLimit:
+          type: number
+          description: Limit per transaction for the user
+          example: "500.00"
+
+    SearchedAccount:
+      type: object
+      properties:
+        accountHolder:
+          type: string
+          description: Name of account holder
+        accountNumber:
+          type: string
+          description: Account number of account holder
+    CreateAccount:
+      type: object
+      properties:
+        dayLimit:
+          type: number
+          example: 500
+        transactionLimit:
+          type: number
+          example: 1000
+        accountType:
+          type: string
+          enum: [savings, current]
+          description: type of account, current/saving
+          example: current
+        accountHolderId:
+          type: number
+          example: 1
+
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email of the user
+          example: joebaker@gmail.com
+        password:
+          type: string
+          description: password of the user
+          example: Password789!
+
+    RefreshToken:
+      type: object
+      properties:
+        auth:
+          type: string
+          description: Authorization token
+          example:
+        refresh:
+          type: string
+          description: Refresh token
+          example:
+        firstName:
+          type: string
+          description: First name of the user
+          example: Joe
+        lastName:
+          type: string
+          description: Last name of the user
+          example: Baker
+
+    ResetPassword:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email of the user
+          example: joebaker@gmail.com
+
+  requestBodies:
+    Transfer:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - amount
+              - accountTo
+              - accountFrom
+            properties:
+              Amount:
+                type: number
+                example: 25.0
+              accountTo:
+                type: string
+                format: 'NL[0-9]{2}UNIB[0-9]{9}'
+                example: 'NL01UNIB112233445'
+              accountFrom:
+                type: string
+                format: 'NL[0-9]{2}UNIB[0-9]{9}'
+                example: 'NL02UNIB544332211'
+
+paths:
+  /accounts:
+    get:
+      tags:
+        - Accounts
+      summary: Get all accounts
+      description: Get all existing bank accounts.
+      parameters:
+        - $ref: '#/components/parameters/QueryLimitParameter'
+        - $ref: '#/components/parameters/QueryOffsetParameter'
+        - in: query
+          name: accountType
+          description: returns accounts of given type
+          required: false
+          schema:
+            type: string
+            enum: [saving, current]
+            example: saving
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+              examples:
+                AccountExample1:
+                  $ref: '#/components/examples/AccountExample1'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccount'
+      tags:
+        - Accounts
+      summary: Create bank account
+      description: Create a new bank account and return a json
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+              examples:
+                AccountExample1:
+                  $ref: '#/components/examples/AccountExample1'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /accounts/{IBAN}:
+    get:
+      tags:
+        - Accounts
+      summary: Get one bank account by IBAN
+      description: Get one bank account by the IBAN requested in the path
+      parameters:
+        - $ref: '#/components/parameters/accountNumberPathParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+              examples:
+                AccountExample1:
+                  $ref: '#/components/examples/AccountExample1'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags:
+        - Accounts
+      summary: Update an account
+      description: Update the bank account using the id passed in the url
+      parameters:
+        - $ref: '#/components/parameters/accountNumberPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Account'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+              example:
+                AccountExample1:
+                  $ref: '#/components/examples/AccountExample1'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /accounts/accountStatus/{IBAN}:
+    put:
+      tags:
+        - Accounts
+      summary: Update account status
+      description: uses a function to activate or disactivate the account
+      parameters:
+        - $ref: '#/components/parameters/accountNumberPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isActive:
+                  type: boolean
+              example:
+                isActive: true
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /accounts/user/{email}:
+    get:
+      summary: Get all accounts for a user.
+      description: Provides all bank accounts for a mathcing account holder
+      tags:
+        - Accounts
+      parameters:
+        - in: path
+          name: email
+          schema:
+            type: string
+            example: user@email.com
+          required: true
+      responses:
+        '200':
+          description: Accounts for the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /accounts/searchByName:
+    get:
+      tags:
+        - Accounts
+      summary: Get all accounts for account holder
+      description: Get all accounts of account holder by their name
+      parameters:
+        - $ref: '#/components/parameters/QueryLimitParameter'
+        - $ref: '#/components/parameters/QueryOffsetParameter'
+        - in: query
+          name: customerName
+          description: Will return all the accounts registered on entered customer name
+          required: true
+          schema:
+            type: string
+          example: test
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchedAccount'
+              example:
+                SearchedAccountEg1:
+                  $ref: '#/components/examples/SearchedAccountEg1'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /accounts/{user_id}/{account_id}/limit:
+    put:
+      tags:
+        - Accounts
+        - Employee
+      security:
+        - bearerAuth: []
+      description: >
+        Updates the account's absolute limit with the given user_id and account_id.
+      operationId: UpdateAccountAbsoluteLimit
+      parameters:
+        - name: account_id
+          in: path
+          description: Account ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountAbsoluteLimitRequest"
+            example:
+              absolute_limit: -20
+      responses:
+        "200":
+          description: Account has been updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+              example:
+                id: 1
+                iban: "NL74UNIB9388899795"
+                currency_type: "EURO"
+                account_type: "SAVING"
+                is_active: true
+                balance: 0
+                absolute_limit: 1000
+                first_name: "John"
+                last_name: "Doe"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/AccountNotFound"
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResponse'
+      responses:
+        '200':
+          description: User registered successfully
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: User Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token for authentication
+                example:
+                  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (JWT token here)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: Token Refresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshToken'
+      responses:
+        '200':
+          description: Token refreshed successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: User Logout
+      responses:
+        '200':
+          description: User logged out successfully
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Password Reset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPassword'
+      responses:
+        '200':
+          description: Password reset instructions sent
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get All Users.
+      parameters:
+        - $ref: '#/components/parameters/QueryLimitParameter'
+        - $ref: '#/components/parameters/QueryOffsetParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+              examples:
+                UserAccountEg1:
+                  $ref: "#/components/examples/User112233445"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags:
+        - Users
+      summary: Create a user.
+      description: This happens when a new user registers themselves.
+      operationId: createUser
+      requestBody:
+        description: User details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResponse'
+            examples:
+              User112233445:
+                $ref: "#/components/examples/User112233445"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+
+  /users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Get one user.
+      description: Get one user by the user Id.
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              examples:
+                User112233445:
+                  $ref: '#/components/examples/User112233445'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Users
+      summary: Delete one user.
+      description: Delete one user with the user Id.
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Users
+      summary: Update user details.
+      description: Update a user object and return the updated user with the user Id.
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResponse'
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              examples:
+                User112233445:
+                  $ref: '#/components/examples/User112233445'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /users/{user_id}/limits:
+    put:
+      tags:
+        - User
+        - Employee
+        - Client
+      security:
+        - bearerAuth: [ ]
+      description: >
+        Updates the user limits.<br>
+        Only Employee can edit User limits.
+        'dailyLimit' refers to the maximum amount of money that can be transferred from the user during a single day.
+      operationId: updateUserLimits
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLimitsRequest"
+            example:
+              daily_transaction_limit: 10000
+      responses:
+        "200":
+          description: User limits have been updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+              example:
+                transaction_limit: 1000
+                daily_transaction_limit: 10000
+                remaining_daily_transaction_limit: 5420.69
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/AccountNotFound"
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Get Transaction History
+      description: |
+        Retrieves transaction history for the authenticated customer.
+        Allows the authenticated customer to search and filter transactions
+      parameters:
+        - name: account_type
+          in: query
+          description: Specifies the type of account (checking, savings).
+          required: true
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: Start date for filtering transactions.
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: End date for filtering transactions.
+          schema:
+            type: string
+            format: date
+        - name: amount
+          in: query
+          description: Filter transactions by amount.
+          schema:
+            type: number
+        - name: iban
+          in: query
+          description: Filter transactions by IBAN.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transaction history retrieved successfully.
+          content:
+            application/json:
+              example:
+                - id: 1
+                  type: deposit
+                  amount: 100.00
+                  account_number: NL90 UNIB 1199 8822 73
+                  timestamp: "2024-05-01T12:00:00Z"
+                - id: 2
+                  type: transfer
+                  amount: 50.00
+                  account_number: NL90 UNIB 1199 8822 73
+                  recipient_account_number: NL90 UNIB 1199 6010 20
+                  timestamp: "2024-05-02T13:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Transactions
+      summary: Transfer Funds
+      description: Transfers funds from the authenticated customer's checking account to another customer's checking account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recipient_iban:
+                  type: string
+                  description: IBAN of the recipient account.
+                amount:
+                  type: number
+                  description: Amount to transfer.
+              example:
+                recipient_iban: "NL90 UNIB 1199 6010 20"
+                amount: 50.00
+      responses:
+        '200':
+          description: Funds transferred successfully.
+          content:
+            application/json:
+              example:
+                message: Funds transferred successfully.
+  /transactions/withdraw:
+    post:
+      tags:
+        - Transactions
+      summary: Withdraw money
+      description: Allows the authenticated customer to withdraw money.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  example: 50.0
+      responses:
+        '200':
+          description: Money withdrawn successfully.
+          content:
+            application/json:
+              example:
+                message: Money withdrawn successfully.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /transactions/deposit:
+    post:
+      tags:
+        - Transactions
+      summary: Deposit money
+      description: Allows the authenticated customer to deposit money.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  example: 100.0
+      responses:
+        '200':
+          description: Money deposited successfully.
+          content:
+            application/json:
+              example:
+                message: Money deposited successfully.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
