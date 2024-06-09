@@ -210,7 +210,7 @@ public class TransactionService {
     return true;
   }
 
-  private void validateAccountAndTransferConditions(TransactionDTO dto, Account accountFrom, Account accountTo) {
+  public void validateAccountAndTransferConditions(TransactionDTO dto, Account accountFrom, Account accountTo) {
     if (dto.amount() <= 0) {
       throw new IllegalArgumentException("Amount must be a positive number");
     }

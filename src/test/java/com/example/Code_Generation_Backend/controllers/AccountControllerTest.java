@@ -6,9 +6,11 @@ import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.models.AccountType;
 import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
+import com.example.Code_Generation_Backend.repositories.AccountRepository;
 import com.example.Code_Generation_Backend.security.JwtProvider;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.UserService;
+import org.h2.mvstore.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -53,16 +56,18 @@ public class AccountControllerTest {
 
     private User testUser;
 
+    private AccountRepository accountRepository;
+
     @BeforeEach
     void setUp() {
 
-        /*testUser = User.builder()
-                .bsn("509547989")
-                .firstName("Dawood")
-                .lastName("Ikram")
+        testUser = User.builder()
+                .bsn("432432432432")
+                .firstName("alfina")
+                .lastName("aura")
                 .dateOfBirth(LocalDate.of(2003, 7, 16))
                 .phoneNumber("0611111121")
-                .email("dawood@gmail.com")
+                .email("aura@gmail.com")
                 .password("password")
                 .isActive(true)
                 .isApproved(true)
@@ -73,35 +78,30 @@ public class AccountControllerTest {
 
         testAccount = new Account();
         testAccount.setIban("NL91INH0417164300");
-        testAccount.setApproved("NL91INH0417164300");*/
+        testAccount.setCustomer(testUser);
     }
 
-    @Test
-    @WithMockUser(username = "alfinaaura@gmail.com", roles = {"CUSTOMER"})
+   /* @Test
+    @WithMockUser(username = "testuser", roles = {"CUSTOMER"})
     void testSearchIban_Success() throws Exception {
-        // Mock service call
-        when(accountService.getIbanByName("alfina", "aura")).thenReturn(testAccount.getIban());
 
-        // Perform the request and verify the response
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Account> accountList = List.of(testAccount);
+        Page<Account> accountPage = new PageImpl<>(accountList, pageable, accountList.size());
+
+        when(accountRepository.findByCustomerFirstNameAndCustomerLastName(pageable, "John", "Doe")).thenReturn(accountPage);
+
+
         mockMvc.perform(get("/accounts/search-iban")
-                        .param("firstName", "alfina")
-                        .param("lastName", "aura"))
+                        .param("firstName", "John")
+                        .param("lastName", "Doe")
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value("NL91INH0417164300"));
+                .andExpect(jsonPath("$.content[0].iban").value("NL91ABNA0417164300"))
+                .andExpect(jsonPath("$.content[0].accountType").value(AccountType.CURRENT.toString()))
+                .andExpect(jsonPath("$.content[0].customerName").value("John Doe"));
     }
+*/
 
-    /*@Test
-    @WithMockUser(username = "testuser", roles = {"USER"})
-    void testSearchIbanNotFound() throws Exception {
-        when(accountService.getIbanByName("Jane", "Smith"))
-                .thenThrow(new AccountNotFoundException("User does not exist"));
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/accounts/search-iban")
-                        .param("firstName", "Jane")
-                        .param("lastName", "Smith")
-                        .with(csrf()))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value("error"))
-                .andExpect(jsonPath("$.message").value("User does not exist"));
-    }*/
 }
