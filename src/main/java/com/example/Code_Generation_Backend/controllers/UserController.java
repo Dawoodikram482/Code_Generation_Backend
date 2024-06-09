@@ -60,6 +60,7 @@ public class UserController {
   }
 
   @GetMapping("/pending-approvals")
+  @PreAuthorize("hasAnyRole('ROLE_EMPLOYEE')")
   public ResponseEntity<Object> getPendingApprovals(
       @RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false) int limit,
       @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false) int offset) {  

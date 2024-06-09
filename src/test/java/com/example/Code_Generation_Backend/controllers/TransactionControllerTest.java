@@ -19,17 +19,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -66,33 +71,33 @@ class TransactionControllerTest {
   @BeforeEach
   void init() {
     user = User.builder()
-        .bsn("509547989")
-        .firstName("Dawood")
-        .lastName("Ikram")
-        .dateOfBirth(LocalDate.of(2003, 7, 16))
-        .phoneNumber("0611111121")
-        .email("dawood@gmail.com")
-        .password("password")
-        .isActive(true)
-        .isApproved(true)
-        .roles(List.of(Role.ROLE_CUSTOMER))
-        .dayLimit(300)
-        .transactionLimit(300)
-        .build();
-
-    user2 = User.builder()
         .bsn("123456789")
         .firstName("Dipika")
         .lastName("Bhandari")
-        .dateOfBirth(LocalDate.of(2003, 5, 8))
+        .dateOfBirth(LocalDate.of(2000, 1, 1))
         .phoneNumber("9987654123")
         .email("db@gmail.com")
         .password("password")
         .isActive(true)
-        .isApproved(true)
         .roles(List.of(Role.ROLE_EMPLOYEE))
+        .transactionLimit(99999999)
+        .dayLimit(99999999)
+        .isApproved(true)
+        .build();
+
+    user2 = User.builder()
+        .bsn("582022290")
+        .firstName("Solaiman")
+        .lastName("Hossain")
+        .dateOfBirth(LocalDate.of(2003, 10, 1))
+        .phoneNumber("0611111121")
+        .email("Solaiman@hossain.com")
+        .password("secretword")
+        .isActive(true)
+        .isApproved(true)
         .dayLimit(300)
         .transactionLimit(300)
+        .roles(List.of(Role.ROLE_EMPLOYEE))
         .build();
 
     testAccount = new Account("NL01UNIB123456789", 1000.0, LocalDate.now(), 500.0, true, AccountType.CURRENT, user);
@@ -131,12 +136,13 @@ class TransactionControllerTest {
     ).andExpect(status().isOk());
   }
   @Test
-  @WithMockUser(username = "dawood@gmail.com", password = "password", roles = "CUSTOMER")
+  @WithMockUser(username = "Solaiman@hossain.com", password = "secretword", roles = "CUSTOMER")
   void customerGettingTheirTransactionsReturnsListOfTransactions() throws Exception{
+    when(transactionService.accountBelongsToUser(testAccount2.getIban(), user2.getEmail())).thenReturn(true);
     when(transactionService.getTransactions(transactionController.getPagination(50,0),
-        testAccount.getIban())).thenReturn(List.of(testTransactionResponseDTO));
+        testAccount2.getIban())).thenReturn(List.of(testTransactionResponseDTO));
     mockMvc.perform(
-        MockMvcRequestBuilders.get("/transactions/account/{iban}", testAccount.getIban())
+        MockMvcRequestBuilders.get("/transactions/account/{iban}", testAccount2.getIban())
             .param("limit", "50")
             .param("offset", "0")
             .with(csrf())
@@ -145,6 +151,7 @@ class TransactionControllerTest {
   @Test
   @WithMockUser(username = "db@gmail.com", password = "password", roles = "EMPLOYEE")
   void employeeGettingTransactionsOfCustomerReturnsListOfTransactions() throws Exception{
+    when(transactionService.accountBelongsToUser(testAccount.getIban(), user.getEmail())).thenReturn(false);
     when(transactionService.getTransactions(transactionController.getPagination(50,0),
         testAccount.getIban())).thenReturn(List.of(testTransactionResponseDTO));
     mockMvc.perform(

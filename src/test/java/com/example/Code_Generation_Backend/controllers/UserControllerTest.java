@@ -1,9 +1,12 @@
 package com.example.Code_Generation_Backend.controllers;
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.CustomerRegistrationDTO;
+import com.example.Code_Generation_Backend.DTOs.requestDTOs.UserLimitsDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDetailsDTO;
 import com.example.Code_Generation_Backend.config.SecurityConfig;
 import com.example.Code_Generation_Backend.jwtFilter.JwtTokenFilter;
 import com.example.Code_Generation_Backend.models.AccountType;
+import com.example.Code_Generation_Backend.models.Role;
 import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.repositories.UserRepository;
 import com.example.Code_Generation_Backend.security.JwtProvider;
@@ -11,9 +14,11 @@ import com.example.Code_Generation_Backend.services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,6 +26,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Limit;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,12 +37,19 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.time.LocalDate;
-import java.util.Collections;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -50,7 +64,8 @@ public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    @Autowired
+    private ObjectMapper objectMapper;
     @MockBean
     private UserService userService;
 
@@ -62,6 +77,8 @@ public class UserControllerTest {
 
     private User testUser;
     private UserDetailsDTO userDetailsDTO;
+    private User mockUser;
+    private UserLimitsDTO userLimitsDTO;
 
     @BeforeEach
     void setUp() {
@@ -107,6 +124,21 @@ public class UserControllerTest {
                         .accountType(AccountType.CURRENT)
                         .build()
         ));
+        mockUser = new User();
+        mockUser.setFirstName("Dipika");
+        mockUser.setLastName("Bhandari");
+        mockUser.setEmail("db@gmail.com");
+        mockUser.setPhoneNumber("123456789");
+        mockUser.setBsn("9987654123");
+        mockUser.setDateOfBirth(LocalDate.of(2003, 12, 12));
+        mockUser.setPassword("password");
+        mockUser.setRoles(List.of(Role.ROLE_EMPLOYEE));
+        mockUser.setApproved(true);
+        mockUser.isActive();
+        mockUser.setTransactionLimit(200);
+        mockUser.setDayLimit(100);
+
+        userLimitsDTO = new UserLimitsDTO(100.0);
     }
 
     @Test
@@ -179,4 +211,41 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.accounts[0].accountBalance").value(1000.0))
                 .andExpect(jsonPath("$.accounts[0].accountType").value("CURRENT"));
     }
+    @Test
+    @WithMockUser(roles = "EMPLOYEE")
+    void approveUserReturns_Ok() throws Exception{
+        when(userService.approveUser(any(Long.class),any(AccountCreatingDTO.class))).thenReturn(true);
+        mockMvc.perform(MockMvcRequestBuilders.post("/users/approve/1")
+                        .contentType("application/json")
+                        .content("{ \"dayLimit\": 100, \"absoluteLimit\": 200, \"transactionLimit\": 300, \"accountHolderId\": 1 }")
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+    @Test
+    @WithMockUser(roles = "EMPLOYEE")
+    void approveUser_ReturnsForbidden_When_UserNotFound() throws Exception {
+        // Mock userService.approveUser() to throw EntityNotFoundException
+        when(userService.approveUser(any(Long.class), any(AccountCreatingDTO.class))).thenThrow(EntityNotFoundException.class);
+
+        // Perform POST request to /approve/{id} endpoint with mock JSON data
+        mockMvc.perform(MockMvcRequestBuilders.post("/approve/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"dayLimit\": 100, \"absoluteLimit\": 200, \"transactionLimit\": 300, \"accountHolderId\": 1 }")
+                .accept(MediaType.APPLICATION_JSON))
+            // Verify response status is UNAUTHORIZED (401)
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "db@gmail.com",password = "password", roles = "EMPLOYEE")
+    public void updateDailyLimits_ReturnsOk_When_ValidInput() throws Exception {
+        when(userService.updateDailyLimit(1L, userLimitsDTO)).thenReturn(mockUser);
+
+        mockMvc.perform(put("/users/1/limits")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userLimitsDTO))
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
 }

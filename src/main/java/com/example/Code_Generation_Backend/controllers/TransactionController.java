@@ -82,7 +82,8 @@ public class TransactionController {
                                                          @PathVariable
                                                          String iban,
                                                          @AuthenticationPrincipal UserDetails jwtUser) {
-    if (!transactionService.accountBelongsToUser(iban, jwtUser.getUsername())) {
+
+    if (!transactionService.accountBelongsToUser(iban, jwtUser.getUsername()) && jwtUser.getAuthorities().stream().noneMatch(isEmployee)) {
       throw new BadCredentialsException("You are not authorized to perform this action");
     }
     try {
