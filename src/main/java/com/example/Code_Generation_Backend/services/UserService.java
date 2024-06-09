@@ -149,8 +149,8 @@ public class UserService {
     user.setPassword(passwordEncoder.encode(dto.getPassword()));
     user.setRoles(List.of(Role.ROLE_CUSTOMER));
     user.setApproved(false);
-    user.setActive(true); // Assuming default active status is true
-    // Save the user first to get an ID for the relationships
+    user.setActive(false);
+    // Save user to repositvory
     user = userRepository.save(user);
     return user;
   }
