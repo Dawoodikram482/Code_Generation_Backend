@@ -51,6 +51,10 @@ public class Account {
     }
   }
 
+  public void getAccountStatus (boolean isActive) {
+    this.isActive = isActive;
+  }
+
   // Method to set account type
   public void setAccountType(AccountType accountType) {
     this.accountType = accountType;
