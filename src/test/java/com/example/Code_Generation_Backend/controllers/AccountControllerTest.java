@@ -162,13 +162,13 @@ public class AccountControllerTest {
         when(accountService.closeAccount("NL01UNIB123456789")).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/accounts/closeAccount/NL01UNIB123456789")
-                .with(csrf()))
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         when(accountService.closeAccount("NL01UNIB123456789")).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/accounts/closeAccount/NL01UNIB123456789")
-                 .with(csrf()))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Failed to close the account"));
     }
