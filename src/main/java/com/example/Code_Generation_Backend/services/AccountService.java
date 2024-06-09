@@ -2,6 +2,7 @@ package com.example.Code_Generation_Backend.services;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AbsoluteLimitRequestDTO;
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AccountCreatingDTO;
+import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionAccountDTO;
 import com.example.Code_Generation_Backend.generators.IBANGenerator;
 import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.models.AccountType;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.LongFunction;
 
@@ -105,10 +107,13 @@ public class AccountService {
     }
   }
 
-  public String getIbanByName(String firstName, String lastName) throws AccountNotFoundException {
-    Account account = accountRepository.findByCustomerFirstNameAndCustomerLastName(firstName, lastName)
-        .orElseThrow(() -> new AccountNotFoundException("User does not exist"));
-    return account.getIban();
+  public Page<TransactionAccountDTO> getIbansByName(Pageable pageable, String firstName, String lastName) throws AccountNotFoundException {
+    Page<Account> accounts = accountRepository.findByCustomerFirstNameAndCustomerLastName(pageable, firstName, lastName);
+    if (accounts.isEmpty()) {
+      throw new AccountNotFoundException("No account found with name: " + firstName + " " + lastName);
+    }
+
+    return accounts.map(account -> new TransactionAccountDTO(account.getIban(), account.getAccountType(), account.getCustomer().getFullName()));
   }
 
 

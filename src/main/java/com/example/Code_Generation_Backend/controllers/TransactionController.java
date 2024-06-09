@@ -9,6 +9,7 @@ import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.TransactionService;
 import com.example.Code_Generation_Backend.services.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.w3c.dom.Entity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -61,16 +63,20 @@ public class TransactionController {
       @RequestParam(required = false) Double amountMin,
       @RequestParam(required = false) Long id,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime timestamp,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
       @RequestParam(required = false) TransactionType type,
       @AuthenticationPrincipal UserDetails jwtUser) {
-    if (jwtUser.getAuthorities().stream().noneMatch((isEmployee)) &&
-        (!transactionService.accountBelongsToUser(ibanTo, jwtUser.getUsername()))
-        && (!transactionService.accountBelongsToUser(ibanFrom, jwtUser.getUsername()))) {
-      throw new BadCredentialsException("You are not authorized to perform this action");
+
+    try {
+      List<TransactionResponseDTO> transactions = transactionService.getAllTransactions(getPagination(limit, offset), id, ibanFrom, ibanTo, amountMin, amountMax, dateFrom, dateTo, type, jwtUser.getUsername());
+      return ResponseEntity.status(HttpStatus.OK).body(transactions);
+    } catch (Exception e) {
+      if (e instanceof EntityNotFoundException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+      }
+
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
-    List<TransactionResponseDTO> transactions = transactionService.getAllTransactions(getPagination(limit, offset), id, ibanFrom, ibanTo, amountMin, amountMax, dateFrom, timestamp, type);
-    return ResponseEntity.ok().body(transactions);
   }
 
   @GetMapping("/account/{iban}")

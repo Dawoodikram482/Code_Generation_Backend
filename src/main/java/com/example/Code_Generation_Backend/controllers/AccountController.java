@@ -2,6 +2,7 @@ package com.example.Code_Generation_Backend.controllers;
 
 import com.example.Code_Generation_Backend.DTOs.requestDTOs.AbsoluteLimitRequestDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.AccountDTO;
+import com.example.Code_Generation_Backend.DTOs.responseDTOs.TransactionAccountDTO;
 import com.example.Code_Generation_Backend.DTOs.responseDTOs.UserDTO;
 import com.example.Code_Generation_Backend.models.Account;
 import com.example.Code_Generation_Backend.models.AccountType;
@@ -9,6 +10,7 @@ import com.example.Code_Generation_Backend.models.User;
 import com.example.Code_Generation_Backend.services.AccountService;
 import com.example.Code_Generation_Backend.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 @RestController
@@ -64,11 +67,17 @@ public class AccountController {
 
   @GetMapping("/search-iban")
   @PreAuthorize(value = "hasRole('ROLE_CUSTOMER')")
-  public String searchIban(@RequestParam String firstName, @RequestParam String lastName) {
+  public ResponseEntity<Object> searchIban(@RequestParam(defaultValue = DEFAULT_LIMIT_STRING, required = false)
+                                             int limit,
+                                           @RequestParam(defaultValue = DEFAULT_OFFSET_STRING, required = false)
+                                             int offset,
+                                           @RequestParam String firstName,
+                                           @RequestParam String lastName) {
     try {
-      return accountService.getIbanByName(firstName, lastName);
+      Page<TransactionAccountDTO> accounts = accountService.getIbansByName(getPagination(limit,offset), firstName, lastName);
+      return ResponseEntity.ok(accounts);
     } catch (AccountNotFoundException e) {
-      return e.getMessage();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
   }
 

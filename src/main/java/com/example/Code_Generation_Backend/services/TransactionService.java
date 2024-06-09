@@ -38,15 +38,67 @@ public class TransactionService {
     this.accountService = accountService;
   }
 
-  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, Long id,String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateBefore, LocalTime timestamp, TransactionType type) {
-    var specification = TransactionSpecifications.getTransactionsByFilters(id, ibanFrom, ibanTo, amountMin, amountMax, dateBefore, timestamp, type);
+  public List<TransactionResponseDTO> getAllTransactions(Pageable pageable, Long id,String ibanFrom, String ibanTo, Double amountMin, Double amountMax, LocalDate dateFrom, LocalDate dateTo, TransactionType type, String email) {
+    User user = userService.getUserByEmail(email);
+    boolean isNotEmployee = !user.getRoles().contains(Role.ROLE_EMPLOYEE);
+
+    List<String> ibansFrom = new ArrayList<>();
+    List<String> ibansTo = new ArrayList<>();
+
+    if (ibanFrom == null && ibanTo == null) {
+      ibansFrom = buildIbanList(ibanFrom, isNotEmployee, user);
+      ibansTo = buildIbanList(ibanTo, isNotEmployee, user);
+    } else {
+        if (ibanFrom != null) {
+            ibansFrom.add(ibanFrom);
+        }
+        if (ibanTo != null) {
+            ibansTo.add(ibanTo);
+        }
+    }
+
+    var specification = TransactionSpecifications.getTransactionsByFilters(id, ibansFrom, ibansTo, amountMin, amountMax, dateFrom, dateTo, type);
     List<Transaction> transactions = transactionRepository.findAll(specification, pageable).getContent();
     if (transactions.isEmpty()) {
-      throw new EntityNotFoundException("No transactions found for account with iban: " + ibanFrom);
+      StringBuilder errorMessage = new StringBuilder();
+
+      appendFilter(errorMessage, "IBAN From", ibanFrom);
+      appendFilter(errorMessage, "IBAN To", ibanTo);
+      appendFilter(errorMessage, "Min Amount", amountMin);
+      appendFilter(errorMessage, "Max Amount", amountMax);
+      appendFilter(errorMessage, "Date From", dateFrom);
+      appendFilter(errorMessage, "Date To", dateTo);
+
+      if (!errorMessage.isEmpty() && errorMessage.charAt(errorMessage.length() - 2) == ',') {
+        errorMessage.setLength(errorMessage.length() - 2);
+        errorMessage.insert(0, "No transactions found for ");
+      } else {
+        errorMessage.append("No transactions found");
+      }
+
+      throw new EntityNotFoundException(errorMessage.toString());
     }
     List<TransactionResponseDTO> transactionResponseDTOS = new ArrayList<>();
     transactions.forEach(transaction -> transactionResponseDTOS.add(createDto(transaction)));
     return transactionResponseDTOS;
+  }
+
+  private void appendFilter(StringBuilder errorMessage, String filterName, Object filterValue) {
+    if (filterValue != null) {
+      errorMessage.append(filterName).append(": ").append(filterValue).append(", ");
+    }
+  }
+
+  private List<String> buildIbanList(String iban, boolean isNotEmployee, User user) {
+    List<String> ibans = new ArrayList<>();
+    if (iban != null) {
+      ibans.add(iban);
+    }
+    if (isNotEmployee && ibans.isEmpty()) {
+      List<Account> accounts = user.getAccounts();
+      accounts.forEach(account -> ibans.add(account.getIban()));
+    }
+    return ibans;
   }
 
   public TransactionResponseDTO addTransaction(TransactionDTO transactionDTO, User initiator) {
@@ -77,7 +129,7 @@ public class TransactionService {
         receiver,
         null,
         LocalDate.now(),
-        LocalTime.now(),
+        LocalTime.now().withNano(0),
         user,
         TransactionType.DEPOSIT,
         atmTransaction.currencyType()
@@ -97,7 +149,7 @@ public class TransactionService {
         null,
         withDrawer,
         LocalDate.now(),
-        LocalTime.now(),
+        LocalTime.now().withNano(0),
         user,
         TransactionType.WITHDRAWAL,
         atmTransactionDTO.currencyType()
@@ -229,13 +281,34 @@ public class TransactionService {
   }
 
   public TransactionResponseDTO createDto(Transaction transaction) {
-    TransactionAccountDTO accountFromDTO = new TransactionAccountDTO(transaction.getAccountFrom().getIban(),
-        transaction.getAccountFrom().getAccountType(),
-        transaction.getAccountFrom().getCustomer().getFullName());
-    TransactionAccountDTO accountToDTO = new TransactionAccountDTO(transaction.getAccountTo().getIban(),
-        transaction.getAccountTo().getAccountType(),
-        transaction.getAccountTo().getCustomer().getFullName());
-    return new TransactionResponseDTO(transaction.getTransactionID(), transaction.getAmount(), accountFromDTO, accountToDTO, transaction.getDate(), transaction.getTimestamp(), transaction.getUserPerforming().getFullName(), transaction.getTransactionType());
+    TransactionAccountDTO accountFromDTO = null;
+    if (transaction.getAccountFrom() != null) {
+      accountFromDTO = new TransactionAccountDTO(
+              transaction.getAccountFrom().getIban(),
+              transaction.getAccountFrom().getAccountType(),
+              transaction.getAccountFrom().getCustomer() != null ? transaction.getAccountFrom().getCustomer().getFullName() : null
+      );
+    }
+
+    TransactionAccountDTO accountToDTO = null;
+    if (transaction.getAccountTo() != null) {
+      accountToDTO = new TransactionAccountDTO(
+              transaction.getAccountTo().getIban(),
+              transaction.getAccountTo().getAccountType(),
+              transaction.getAccountTo().getCustomer() != null ? transaction.getAccountTo().getCustomer().getFullName() : null
+      );
+    }
+
+    return new TransactionResponseDTO(
+            transaction.getTransactionID(),
+            transaction.getAmount(),
+            accountFromDTO,
+            accountToDTO,
+            transaction.getDate(),
+            transaction.getTimestamp(),
+            transaction.getUserPerforming() != null ? transaction.getUserPerforming().getFullName() : null,
+            transaction.getTransactionType()
+    );
   }
 
   public double getSumOfMoneyTransferredToday(String email) {

@@ -165,7 +165,7 @@ class TransactionControllerTest {
   @WithMockUser(username = "db@gmail.com", password = "password", roles = "EMPLOYEE")
   void employeeGettingAllTransactionsReturnsListOfTransaction() throws Exception{
     when(transactionService.getAllTransactions(transactionController.getPagination(50,0),
-        null, null, null, null, null, null, null, null))
+        null, null, null, null, null, null, null, null, user2.getEmail()))
         .thenReturn(List.of(testTransactionResponseDTO));
     mockMvc.perform(
         MockMvcRequestBuilders.get("/transactions")
