@@ -83,7 +83,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
 
     // Create accounts for Dawood
     Account savingsAccount = Account.builder()
-            .iban("NL01DAWO0000000001")
+            .iban("NL01UNIB0000000015")
             .accountBalance(777.0)
             .creationDate(LocalDate.now())
             .absoluteLimit(100)
@@ -94,7 +94,7 @@ public class RuntimeDataSeeder implements ApplicationRunner {
     accountService.saveAccount(savingsAccount);
 
     Account currentAccount = Account.builder()
-            .iban("NL01DAWO0000000002")
+            .iban("NL01UNIB0000000019")
             .accountBalance(7777.0)
             .creationDate(LocalDate.now())
             .absoluteLimit(100)
